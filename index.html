@@ -863,18 +863,6 @@
                     ⚠️ กรุณาระบุรหัสพนักงาน 6 หลัก
                 </p>
 
-                <!-- Live Employee / Contractor Lookup Preview in Modal -->
-                <div id="modal-emp-preview" class="hidden mt-3 p-3 bg-emerald-50/80 border border-emerald-200 rounded-xl text-xs space-y-1">
-                    <div class="flex items-center justify-between">
-                        <span class="font-bold text-emerald-900" id="modal-preview-name">-</span>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-200/80 text-emerald-800" id="modal-preview-badge">WSB</span>
-                    </div>
-                    <div class="text-slate-600 flex flex-wrap gap-x-2 gap-y-0.5">
-                        <span>แผนก: <b class="text-slate-800" id="modal-preview-dept">-</b></span>
-                        <span id="modal-preview-division-box">• ฝ่าย: <b class="text-slate-800" id="modal-preview-division">-</b></span>
-                    </div>
-                </div>
-
                 <div class="bg-emerald-50/60 border border-emerald-100 rounded-xl p-3 text-xs text-emerald-900 flex items-start gap-2 leading-relaxed">
                     <span class="text-emerald-700 font-bold flex-shrink-0">🔒</span>
                     <span>ข้อมูลนี้จะถูกบันทึกคู่กับข้อมูลการประเมินเพื่อใช้ในการสรุปผลรายงาน</span>
@@ -897,6 +885,27 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal: Employee Not Found Alert -->
+    <div id="emp-not-found-modal" class="hidden fixed inset-0 z-[70] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-rose-100 animate-in fade-in zoom-in-95 duration-150">
+            <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 shadow-xs">
+                ⚠️
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">ไม่พบข้อมูลพนักงาน</h3>
+            <p class="text-xs text-slate-600 leading-relaxed mb-5">
+                รหัสพนักงานที่ระบุไม่มีในระบบฐานข้อมูล <br><b class="text-slate-800">"รายชื่อพนักกงาน WSBและSupภายใน"</b><br><br>
+                <span class="text-rose-600 font-bold">กรุณาดำเนินการใส่รหัสพนักงานให้ถูกต้อง</span><br>จึงจะสามารถเข้าสู่การทำแบบประเมินได้
+            </p>
+            <button 
+                type="button" 
+                onclick="closeEmpNotFoundModal()" 
+                class="w-full py-2.5 px-4 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm rounded-xl transition shadow-md cursor-pointer"
+            >
+                ตกลง / ใส่รหัสพนักงานใหม่
+            </button>
         </div>
     </div>
 
