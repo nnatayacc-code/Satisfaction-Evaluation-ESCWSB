@@ -441,6 +441,129 @@ function closeEmpNotFoundModal() {
     }
 }
 
+// Open "New Employee Entry" Modal
+function openNewEmployeeModal() {
+    const modalNotFound = document.getElementById('emp-not-found-modal');
+    if (modalNotFound) modalNotFound.classList.add('hidden');
+
+    const modalEmpId = document.getElementById('emp-id-modal');
+    if (modalEmpId) modalEmpId.classList.add('hidden');
+
+    const newEmpModal = document.getElementById('new-emp-modal');
+    if (newEmpModal) {
+        newEmpModal.classList.remove('hidden');
+        renderDepartmentOptions();
+
+        // Pre-fill employee ID if user previously typed one
+        const inputOld = document.getElementById('input-emp-id');
+        const inputNewId = document.getElementById('new-emp-id');
+        const inputNewName = document.getElementById('new-emp-name');
+        
+        if (inputOld && inputNewId && inputOld.value) {
+            inputNewId.value = inputOld.value.trim();
+        }
+
+        setTimeout(() => {
+            if (inputNewId && !inputNewId.value) {
+                inputNewId.focus();
+            } else if (inputNewName) {
+                inputNewName.focus();
+            }
+        }, 80);
+    }
+}
+
+// Close "New Employee Entry" Modal
+function closeNewEmployeeModal() {
+    const modal = document.getElementById('new-emp-modal');
+    if (modal) modal.classList.add('hidden');
+    const err = document.getElementById('new-emp-error');
+    if (err) err.classList.add('hidden');
+}
+
+// Handle New Employee Submission
+function handleNewEmployeeSubmit(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const idInput = document.getElementById('new-emp-id');
+    const nameInput = document.getElementById('new-emp-name');
+    const deptSelect = document.getElementById('new-emp-dept');
+    const divInput = document.getElementById('new-emp-division');
+    const errEl = document.getElementById('new-emp-error');
+
+    const idVal = idInput ? idInput.value.trim() : '';
+    const nameVal = nameInput ? nameInput.value.trim() : '';
+    const deptVal = deptSelect ? deptSelect.value : '';
+    const divVal = divInput ? divInput.value.trim() : '';
+
+    if (!idVal) {
+        if (errEl) {
+            errEl.textContent = '⚠️ กรุณาระบุรหัสพนักงาน';
+            errEl.classList.remove('hidden');
+        }
+        if (idInput) idInput.focus();
+        return;
+    }
+
+    if (!nameVal) {
+        if (errEl) {
+            errEl.textContent = '⚠️ กรุณาระบุชื่อ - นามสกุล';
+            errEl.classList.remove('hidden');
+        }
+        if (nameInput) nameInput.focus();
+        return;
+    }
+
+    if (!deptVal) {
+        if (errEl) {
+            errEl.textContent = '⚠️ กรุณาเลือกแผนก';
+            errEl.classList.remove('hidden');
+        }
+        if (deptSelect) deptSelect.focus();
+        return;
+    }
+
+    if (errEl) errEl.classList.add('hidden');
+
+    const newEmp = {
+        id: idVal,
+        fullName: nameVal,
+        firstName: nameVal,
+        lastName: '',
+        dept: deptVal,
+        division: divVal || '-',
+        group: 'พนักงานเข้าใหม่',
+        jobType: 'พนักงานใหม่ (กรอกเอง)',
+        sheet: 'new_employee'
+    };
+
+    if (typeof EMPLOYEE_DATABASE !== 'undefined' && Array.isArray(EMPLOYEE_DATABASE)) {
+        const existingIdx = EMPLOYEE_DATABASE.findIndex(emp => emp.id && emp.id.toString() === idVal);
+        if (existingIdx >= 0) {
+            EMPLOYEE_DATABASE[existingIdx] = newEmp;
+        } else {
+            EMPLOYEE_DATABASE.push(newEmp);
+        }
+    }
+
+    AppState.currentEmployeeId = idVal;
+    AppState.evaluatorType = 'employee';
+
+    const targetTab = AppState.pendingEvaluationTab || 'form1';
+
+    if (targetTab === 'form1') {
+        const f1Name = document.getElementById('f1-name');
+        if (f1Name) f1Name.value = idVal;
+        applyEmployeeToForm(1, newEmp, idVal);
+    } else if (targetTab === 'form2') {
+        const f2Name = document.getElementById('f2-name');
+        if (f2Name) f2Name.value = idVal;
+        applyEmployeeToForm(2, newEmp, idVal);
+    }
+
+    closeNewEmployeeModal();
+    switchTab(targetTab, true);
+}
+
 // Confirm Employee ID / Contractor and proceed to evaluation
 function confirmEmployeeId(e) {
     if (e && e.preventDefault) e.preventDefault();
@@ -633,7 +756,8 @@ function renderDepartmentOptions() {
     const selects = [
         document.getElementById('f1-dept'),
         document.getElementById('f2-dept'),
-        document.getElementById('filter-dept')
+        document.getElementById('filter-dept'),
+        document.getElementById('new-emp-dept')
     ];
 
     // Build department list combining EMPLOYEE_DATABASE and fallback DEPARTMENTS
@@ -2766,6 +2890,7 @@ function setupEventListeners() {
             closeAdminLoginModal();
             closeQRModal();
             closeEmpNotFoundModal();
+            closeNewEmployeeModal();
         }
     });
 
