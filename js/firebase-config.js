@@ -106,3 +106,50 @@ async function fetchEvaluationsFromCloud() {
         return null;
     }
 }
+
+/**
+ * Delete a single evaluation record from Cloud Firestore
+ * @param {string} docId
+ * @returns {Promise<boolean>}
+ */
+async function deleteEvaluationFromCloud(docId) {
+    if (!isFirebaseReady || !firebaseDb || !docId) {
+        return false;
+    }
+
+    try {
+        await firebaseDb.collection('evaluations').doc(docId).delete();
+        console.log("Evaluation deleted from Cloud Firestore:", docId);
+        return true;
+    } catch (err) {
+        console.error("Firestore delete error:", err);
+        return false;
+    }
+}
+
+/**
+ * Clear all evaluation records from Cloud Firestore
+ * @returns {Promise<boolean>}
+ */
+async function clearAllEvaluationsFromCloud() {
+    if (!isFirebaseReady || !firebaseDb) {
+        return false;
+    }
+
+    try {
+        const snapshot = await firebaseDb.collection('evaluations').get();
+        if (snapshot.empty) return true;
+
+        // Process in batches (Firestore batch limit is 500)
+        const batch = firebaseDb.batch();
+        snapshot.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+        await batch.commit();
+        console.log(`Cleared ${snapshot.size} evaluations from Cloud Firestore`);
+        return true;
+    } catch (err) {
+        console.error("Firestore clear all error:", err);
+        return false;
+    }
+}
