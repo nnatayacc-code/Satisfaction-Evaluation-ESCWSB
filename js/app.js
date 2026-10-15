@@ -268,6 +268,13 @@ function switchTab(tabId, bypassEmpModal = false) {
         }
     });
 
+    // Ensure evaluation forms render correct evaluator controls (Contractor vs Employee)
+    if (tabId === 'form1') {
+        applyEvaluatorTypeToForm(1, AppState.evaluatorType || 'employee');
+    } else if (tabId === 'form2') {
+        applyEvaluatorTypeToForm(2, AppState.evaluatorType || 'employee');
+    }
+
     // Update active nav button styles
     document.querySelectorAll('[data-target-tab]').forEach(btn => {
         const target = btn.getAttribute('data-target-tab');
@@ -376,19 +383,18 @@ function setEvaluatorType(type) {
 }
 
 // Render Contractor Dropdown Options from EMPLOYEE_DATABASE
-function renderContractorOptions() {
+function renderContractorOptions(filterDept = '') {
     const sel = document.getElementById('select-sup-name');
     if (!sel) return;
-
-    // Check if already populated (more than 1 option)
-    if (sel.options.length > 1) return;
 
     sel.innerHTML = '<option value="">-- กรุณาเลือกรายชื่อผู้รับเหมา --</option>';
 
     if (typeof EMPLOYEE_DATABASE !== 'undefined' && Array.isArray(EMPLOYEE_DATABASE)) {
-        const contractors = EMPLOYEE_DATABASE.filter(e => e.sheet === 'Sup' || e.sheet === 'sup');
+        let contractors = EMPLOYEE_DATABASE.filter(e => e.sheet === 'Sup' || e.sheet === 'sup');
+        if (filterDept) {
+            contractors = contractors.filter(c => c.dept === filterDept);
+        }
         
-        // Group by department/work type if available
         contractors.forEach((c, idx) => {
             const opt = document.createElement('option');
             opt.value = c.fullName;
@@ -397,6 +403,16 @@ function renderContractorOptions() {
             sel.appendChild(opt);
         });
     }
+}
+
+// Handler when contractor department is selected in modal
+function onModalSupDeptChange(deptVal) {
+    const errEl = document.getElementById('emp-id-error');
+    if (errEl) errEl.classList.add('hidden');
+    renderContractorOptions(deptVal);
+    const sel = document.getElementById('select-sup-name');
+    if (sel) sel.value = '';
+    AppState.selectedContractor = null;
 }
 
 // Handler when contractor name is selected in dropdown
@@ -409,8 +425,19 @@ function onModalSupSelect(fullName) {
         return;
     }
 
+    const deptSelect = document.getElementById('select-sup-dept');
+    const deptVal = deptSelect ? deptSelect.value : '';
+
     const contractor = EMPLOYEE_DATABASE.find(e => (e.sheet === 'Sup' || e.sheet === 'sup') && e.fullName === fullName);
-    AppState.selectedContractor = contractor || null;
+    if (contractor) {
+        AppState.selectedContractor = contractor;
+        // If department was not yet chosen, sync it
+        if (!deptVal && contractor.dept && deptSelect) {
+            deptSelect.value = contractor.dept;
+        }
+    } else {
+        AppState.selectedContractor = { fullName: fullName, dept: deptVal || 'ผรม. ทำความสะอาด', sheet: 'Sup' };
+    }
 }
 
 // Close Employee ID Modal
@@ -452,19 +479,23 @@ function openNewEmployeeModal() {
     const newEmpModal = document.getElementById('new-emp-modal');
     if (newEmpModal) {
         newEmpModal.classList.remove('hidden');
-        renderDepartmentOptions();
+        
+        // Sync evaluator type tab with current selection
+        setNewEvaluatorType(AppState.evaluatorType || 'employee');
 
         // Pre-fill employee ID if user previously typed one
         const inputOld = document.getElementById('input-emp-id');
         const inputNewId = document.getElementById('new-emp-id');
         const inputNewName = document.getElementById('new-emp-name');
         
-        if (inputOld && inputNewId && inputOld.value) {
+        if (inputOld && inputNewId && inputOld.value && AppState.evaluatorType !== 'contractor') {
             inputNewId.value = inputOld.value.trim();
         }
 
         setTimeout(() => {
-            if (inputNewId && !inputNewId.value) {
+            if (AppState.evaluatorType === 'contractor') {
+                if (inputNewName) inputNewName.focus();
+            } else if (inputNewId && !inputNewId.value) {
                 inputNewId.focus();
             } else if (inputNewName) {
                 inputNewName.focus();
@@ -481,7 +512,62 @@ function closeNewEmployeeModal() {
     if (err) err.classList.add('hidden');
 }
 
-// Handle New Employee Submission
+// Current Evaluator Type in New Entry Modal
+let currentNewEvaluatorType = 'employee';
+
+// Switch between Employee and Contractor in New Entry Modal
+function setNewEvaluatorType(type) {
+    currentNewEvaluatorType = type;
+    const btnEmp = document.getElementById('new-emp-tab-emp');
+    const btnSup = document.getElementById('new-emp-tab-sup');
+    const idContainer = document.getElementById('new-emp-id-container');
+    const idInput = document.getElementById('new-emp-id');
+    const titleEl = document.getElementById('new-emp-modal-title');
+    const subtitleEl = document.getElementById('new-emp-modal-subtitle');
+    const deptSelect = document.getElementById('new-emp-dept');
+    const errEl = document.getElementById('new-emp-error');
+
+    if (errEl) errEl.classList.add('hidden');
+
+    if (type === 'contractor') {
+        if (btnSup) {
+            btnSup.className = 'py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition shadow-xs bg-white text-emerald-800 border border-emerald-200 cursor-pointer';
+        }
+        if (btnEmp) {
+            btnEmp.className = 'py-2 px-3 rounded-xl font-semibold text-xs flex items-center justify-center gap-1.5 transition text-slate-600 hover:text-slate-900 cursor-pointer';
+        }
+        if (idContainer) idContainer.classList.add('hidden');
+        if (idInput) {
+            idInput.required = false;
+            idInput.value = 'ผู้รับเหมา';
+        }
+        if (titleEl) titleEl.textContent = 'กรอกข้อมูลผู้รับเหมา';
+        if (subtitleEl) subtitleEl.textContent = 'สำหรับผู้รับเหมาที่ต้องการกรอกข้อมูลเพื่อทำแบบประเมิน';
+
+        // Populate department dropdown with ONLY the 2 contractor departments
+        populateDepartmentSelect(deptSelect, 'contractor');
+    } else {
+        // Employee
+        if (btnEmp) {
+            btnEmp.className = 'py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition shadow-xs bg-white text-emerald-800 border border-emerald-200 cursor-pointer';
+        }
+        if (btnSup) {
+            btnSup.className = 'py-2 px-3 rounded-xl font-semibold text-xs flex items-center justify-center gap-1.5 transition text-slate-600 hover:text-slate-900 cursor-pointer';
+        }
+        if (idContainer) idContainer.classList.remove('hidden');
+        if (idInput) {
+            idInput.required = true;
+            if (idInput.value === 'ผู้รับเหมา') idInput.value = '';
+        }
+        if (titleEl) titleEl.textContent = 'กรอกข้อมูลพนักงานใหม่';
+        if (subtitleEl) subtitleEl.textContent = 'สำหรับพนักงานเข้าใหม่ที่ยังไม่มีข้อมูลในระบบไฟล์';
+
+        // Populate department dropdown with ONLY employee departments
+        populateDepartmentSelect(deptSelect, 'employee');
+    }
+}
+
+// Handle New Employee / Contractor Submission
 function handleNewEmployeeSubmit(e) {
     if (e && e.preventDefault) e.preventDefault();
     const idInput = document.getElementById('new-emp-id');
@@ -490,12 +576,13 @@ function handleNewEmployeeSubmit(e) {
     const divInput = document.getElementById('new-emp-division');
     const errEl = document.getElementById('new-emp-error');
 
-    const idVal = idInput ? idInput.value.trim() : '';
+    const isContractor = currentNewEvaluatorType === 'contractor';
+    const idVal = isContractor ? 'ผู้รับเหมา' : (idInput ? idInput.value.trim() : '');
     const nameVal = nameInput ? nameInput.value.trim() : '';
     const deptVal = deptSelect ? deptSelect.value : '';
     const divVal = divInput ? divInput.value.trim() : '';
 
-    if (!idVal) {
+    if (!isContractor && !idVal) {
         if (errEl) {
             errEl.textContent = '⚠️ กรุณาระบุรหัสพนักงาน';
             errEl.classList.remove('hidden');
@@ -506,7 +593,7 @@ function handleNewEmployeeSubmit(e) {
 
     if (!nameVal) {
         if (errEl) {
-            errEl.textContent = '⚠️ กรุณาระบุชื่อ - นามสกุล';
+            errEl.textContent = isContractor ? '⚠️ กรุณาระบุชื่อ - นามสกุล ผู้รับเหมา' : '⚠️ กรุณาระบุชื่อ - นามสกุล';
             errEl.classList.remove('hidden');
         }
         if (nameInput) nameInput.focus();
@@ -531,22 +618,24 @@ function handleNewEmployeeSubmit(e) {
         lastName: '',
         dept: deptVal,
         division: divVal || '-',
-        group: 'พนักงานเข้าใหม่',
-        jobType: 'พนักงานใหม่ (กรอกเอง)',
-        sheet: 'new_employee'
+        group: isContractor ? 'ผู้รับเหมาภายใน' : 'พนักงานเข้าใหม่',
+        jobType: isContractor ? 'ผู้รับเหมา' : 'พนักงานใหม่ (กรอกเอง)',
+        sheet: isContractor ? 'Sup' : 'new_employee'
     };
 
     if (typeof EMPLOYEE_DATABASE !== 'undefined' && Array.isArray(EMPLOYEE_DATABASE)) {
-        const existingIdx = EMPLOYEE_DATABASE.findIndex(emp => emp.id && emp.id.toString() === idVal);
-        if (existingIdx >= 0) {
-            EMPLOYEE_DATABASE[existingIdx] = newEmp;
-        } else {
-            EMPLOYEE_DATABASE.push(newEmp);
+        if (!isContractor) {
+            const existingIdx = EMPLOYEE_DATABASE.findIndex(emp => emp.id && emp.id.toString() === idVal);
+            if (existingIdx >= 0) {
+                EMPLOYEE_DATABASE[existingIdx] = newEmp;
+            } else {
+                EMPLOYEE_DATABASE.push(newEmp);
+            }
         }
     }
 
     AppState.currentEmployeeId = idVal;
-    AppState.evaluatorType = 'employee';
+    AppState.evaluatorType = isContractor ? 'contractor' : 'employee';
 
     const targetTab = AppState.pendingEvaluationTab || 'form1';
 
@@ -606,8 +695,19 @@ function confirmEmployeeId(e) {
         }
     } else {
         // Contractor
+        const deptSelect = document.getElementById('select-sup-dept');
+        const deptVal = deptSelect ? deptSelect.value : '';
         const selSup = document.getElementById('select-sup-name');
         const fullName = selSup ? selSup.value : '';
+
+        if (!deptVal) {
+            if (errorEl) {
+                errorEl.textContent = '⚠️ กรุณาเลือกแผนกผู้รับเหมา';
+                errorEl.classList.remove('hidden');
+            }
+            if (deptSelect) deptSelect.focus();
+            return;
+        }
 
         if (!fullName) {
             if (errorEl) {
@@ -618,14 +718,16 @@ function confirmEmployeeId(e) {
             return;
         }
 
-        const contractor = AppState.selectedContractor || (typeof EMPLOYEE_DATABASE !== 'undefined' ? EMPLOYEE_DATABASE.find(e => (e.sheet === 'Sup' || e.sheet === 'sup') && e.fullName === fullName) : null);
-        if (!contractor) {
-            openEmpNotFoundModal();
-            return;
-        }
+        const contractor = AppState.selectedContractor || (typeof EMPLOYEE_DATABASE !== 'undefined' ? EMPLOYEE_DATABASE.find(e => (e.sheet === 'Sup' || e.sheet === 'sup') && e.fullName === fullName) : null) || {
+            fullName: fullName,
+            dept: deptVal,
+            sheet: 'Sup',
+            group: 'ผู้รับเหมาภายใน'
+        };
 
         if (errorEl) errorEl.classList.add('hidden');
         AppState.currentEmployeeId = 'ผู้รับเหมา';
+        AppState.evaluatorType = 'contractor';
 
         if (targetTab === 'form1') {
             const f1Name = document.getElementById('f1-name');
@@ -660,6 +762,96 @@ function onFormEmpIdInput(formNum, val) {
     applyEmployeeToForm(formNum, emp, trimmed);
 }
 
+// Configure Form 1 or Form 2 evaluator UI (Contractor vs Employee)
+function applyEvaluatorTypeToForm(formNum, type) {
+    const prefix = `f${formNum}`;
+    const idContainer = document.getElementById(`${prefix}-id-container`);
+    const idInput = document.getElementById(`${prefix}-name`);
+    const nameLabel = document.getElementById(`${prefix}-fullname-label`);
+    const nameInput = document.getElementById(`${prefix}-fullname`);
+    const deptSelect = document.getElementById(`${prefix}-dept`);
+    const headerTitle = document.getElementById(`${prefix}-header-title`);
+    const statusEl = document.getElementById(`${prefix}-emp-status`);
+    const btnEmp = document.getElementById(`${prefix}-btn-type-emp`);
+    const btnSup = document.getElementById(`${prefix}-btn-type-sup`);
+    const accentColor = formNum === 1 ? 'text-emerald-800' : 'text-sky-800';
+
+    const currentDeptVal = deptSelect ? deptSelect.value : '';
+
+    if (type === 'contractor') {
+        // Update Form Switcher Buttons
+        if (btnSup) {
+            btnSup.className = `px-3 py-1.5 rounded-lg text-xs font-bold transition bg-white ${accentColor} shadow-xs cursor-pointer`;
+        }
+        if (btnEmp) {
+            btnEmp.className = 'px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 transition cursor-pointer';
+        }
+
+        // Contractor: completely hide employee ID field and remove required attribute
+        if (idContainer) idContainer.classList.add('hidden');
+        if (idInput) {
+            idInput.required = false;
+            idInput.value = 'ผู้รับเหมา';
+        }
+        if (nameLabel) nameLabel.textContent = 'ชื่อ - สกุล ผู้รับเหมา';
+        if (nameInput) {
+            nameInput.readOnly = false;
+            nameInput.classList.remove('bg-slate-100', 'cursor-not-allowed');
+            nameInput.classList.add('bg-white');
+            nameInput.placeholder = 'ระบุชื่อ - สกุล ผู้รับเหมา';
+        }
+        if (headerTitle) {
+            headerTitle.innerHTML = '<span>👤</span> ข้อมูลผู้ทำแบบประเมิน (ผู้รับเหมา)';
+        }
+        if (statusEl) {
+            statusEl.textContent = '✓ ผู้รับเหมา';
+            statusEl.className = 'text-xs font-bold text-emerald-600';
+        }
+        // Restrict department dropdown to ONLY the 2 contractor departments
+        populateDepartmentSelect(deptSelect, 'contractor', currentDeptVal);
+    } else {
+        // Update Form Switcher Buttons
+        if (btnEmp) {
+            btnEmp.className = `px-3 py-1.5 rounded-lg text-xs font-bold transition bg-white ${accentColor} shadow-xs cursor-pointer`;
+        }
+        if (btnSup) {
+            btnSup.className = 'px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 transition cursor-pointer';
+        }
+
+        // Employee: show employee ID input and mark as required
+        if (idContainer) idContainer.classList.remove('hidden');
+        if (idInput) {
+            idInput.required = true;
+            if (idInput.value === 'ผู้รับเหมา') idInput.value = '';
+        }
+        if (nameLabel) nameLabel.textContent = 'ชื่อ - สกุล (ดึงอัตโนมัติ)';
+        if (nameInput) {
+            nameInput.readOnly = true;
+            nameInput.classList.add('bg-slate-100', 'cursor-not-allowed');
+            nameInput.classList.remove('bg-white');
+            nameInput.placeholder = 'ชื่อผู้ประเมิน';
+        }
+        if (headerTitle) {
+            headerTitle.innerHTML = '<span>👤</span> ข้อมูลผู้ทำแบบประเมิน (กรอกรหัสพนักงาน ข้อมูลอื่นๆ จะขึ้นโดยอัตโนมัติ)';
+        }
+        // Restrict department dropdown to ONLY employee departments
+        populateDepartmentSelect(deptSelect, 'employee', currentDeptVal);
+    }
+}
+
+// Switch between Employee and Contractor directly on Form 1 or Form 2
+function switchFormEvaluatorType(formNum, type) {
+    AppState.evaluatorType = type;
+    applyEvaluatorTypeToForm(formNum, type);
+    if (type === 'contractor') {
+        const nameInput = document.getElementById(`f${formNum}-fullname`);
+        if (nameInput) nameInput.focus();
+    } else {
+        const idInput = document.getElementById(`f${formNum}-name`);
+        if (idInput) idInput.focus();
+    }
+}
+
 // Apply resolved employee info into Form 1 or Form 2
 function applyEmployeeToForm(formNum, emp, rawId) {
     const prefix = `f${formNum}`;
@@ -668,28 +860,26 @@ function applyEmployeeToForm(formNum, emp, rawId) {
     const nameInput = document.getElementById(`${prefix}-fullname`);
     const deptSelect = document.getElementById(`${prefix}-dept`);
 
+    const isContractor = AppState.evaluatorType === 'contractor' || (emp && (emp.sheet === 'Sup' || emp.sheet === 'sup' || (emp.dept && emp.dept.startsWith('ผรม.')))) || rawId === 'ผู้รับเหมา';
+
+    // Apply UI state (hide/show Employee ID and populate matching department list)
+    applyEvaluatorTypeToForm(formNum, isContractor ? 'contractor' : 'employee');
+
     if (emp) {
         if (matchIcon) matchIcon.classList.remove('hidden');
         if (statusEl) {
-            statusEl.textContent = `✓ พบข้อมูล (${emp.sheet === 'Sup' ? 'ผู้รับเหมา' : 'พนักงาน WSB'})`;
+            statusEl.textContent = `✓ พบข้อมูล (${isContractor ? 'ผู้รับเหมา' : 'พนักงาน WSB'})`;
             statusEl.className = 'text-xs font-bold text-emerald-600';
         }
         if (nameInput) {
-            nameInput.value = emp.fullName || `${emp.firstName || ''} ${emp.lastName || ''}`.trim() || emp.id;
+            nameInput.value = emp.fullName || `${emp.firstName || ''} ${emp.lastName || ''}`.trim() || emp.id || '';
         }
 
         // Auto-select department
         if (deptSelect && emp.dept) {
-            let found = false;
-            for (let i = 0; i < deptSelect.options.length; i++) {
-                if (deptSelect.options[i].value === emp.dept) {
-                    deptSelect.selectedIndex = i;
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                // If not found, add option dynamically
+            deptSelect.value = emp.dept;
+            if (deptSelect.value !== emp.dept) {
+                // If not found in current options, add it
                 const opt = document.createElement('option');
                 opt.value = emp.dept;
                 opt.textContent = `${emp.dept}${emp.division ? ' (' + emp.division + ')' : ''}`;
@@ -706,15 +896,15 @@ function applyEmployeeToForm(formNum, emp, rawId) {
             const extraType = document.getElementById('f1-extra-type');
             if (extraBox) extraBox.classList.remove('hidden');
             if (extraDiv) extraDiv.textContent = emp.division || '-';
-            if (extraGroup) extraGroup.textContent = emp.group || '-';
-            if (extraType) extraType.textContent = emp.jobType || (emp.sheet === 'Sup' ? 'ผู้รับเหมา' : 'ประจำ');
+            if (extraGroup) extraGroup.textContent = emp.group || (isContractor ? 'ผู้รับเหมาภายใน' : '-');
+            if (extraType) extraType.textContent = emp.jobType || (isContractor ? 'ผู้รับเหมา' : 'ประจำ');
         }
 
         // Form 2 specific group and division inputs
         if (formNum === 2) {
             const groupInput = document.getElementById('f2-group');
             const divInput = document.getElementById('f2-division');
-            if (groupInput) groupInput.value = emp.group || (emp.sheet === 'Sup' ? 'ผู้รับเหมาภายใน' : 'ผลิตน้ำตาลวังสมบูรณ์');
+            if (groupInput) groupInput.value = emp.group || (isContractor ? 'ผู้รับเหมาภายใน' : 'ผลิตน้ำตาลวังสมบูรณ์');
             if (divInput) divInput.value = emp.division || '-';
         }
     } else {
@@ -751,54 +941,67 @@ function clearFormEmployeeInfo(formNum) {
     }
 }
 
-// Render Department Options in select dropdowns
-function renderDepartmentOptions() {
-    const selects = [
-        document.getElementById('f1-dept'),
-        document.getElementById('f2-dept'),
-        document.getElementById('filter-dept'),
-        document.getElementById('new-emp-dept')
-    ];
-
-    // Build department list combining EMPLOYEE_DATABASE and fallback DEPARTMENTS
-    const deptMap = new Map();
+// Filtered department lists
+function getDepartmentList(filterType = 'all') {
+    const contractorDepts = ['ผรม. ทำความสะอาด', 'ผรม. ภูมิทัศน์'];
+    const wsbDeptMap = new Map();
+    const supDeptMap = new Map();
 
     if (typeof EMPLOYEE_DATABASE !== 'undefined' && Array.isArray(EMPLOYEE_DATABASE)) {
         EMPLOYEE_DATABASE.forEach(emp => {
-            if (emp.dept && emp.dept.trim()) {
-                const name = emp.dept.trim();
-                if (!deptMap.has(name)) {
-                    deptMap.set(name, emp.division || emp.group || '');
-                }
+            if (!emp.dept || !emp.dept.trim()) return;
+            const name = emp.dept.trim();
+            const isSup = (emp.sheet === 'Sup' || emp.sheet === 'sup' || name.startsWith('ผรม.'));
+            if (isSup) {
+                if (!supDeptMap.has(name)) supDeptMap.set(name, emp.division || '');
+            } else {
+                if (!wsbDeptMap.has(name)) wsbDeptMap.set(name, emp.division || '');
             }
         });
     }
 
-    if (typeof DEPARTMENTS !== 'undefined' && Array.isArray(DEPARTMENTS)) {
-        DEPARTMENTS.forEach(d => {
-            if (d.name && !deptMap.has(d.name)) {
-                deptMap.set(d.name, d.division || '');
-            }
-        });
-    }
-
-    // Sort alphabetically by department name
-    const sortedDepts = Array.from(deptMap.entries()).sort((a, b) => a[0].localeCompare(b[0], 'th'));
-
-    selects.forEach(sel => {
-        if (!sel) return;
-        const isFilter = sel.id === 'filter-dept';
-        sel.innerHTML = isFilter 
-            ? '<option value="ALL">ทุกฝ่าย / แผนก ทั้งหมด</option>' 
-            : '<option value="">-- กรุณาเลือกแผนก / ฝ่าย --</option>';
-
-        sortedDepts.forEach(([name, div]) => {
-            const opt = document.createElement('option');
-            opt.value = name;
-            opt.textContent = div ? `${name} (${div})` : name;
-            sel.appendChild(opt);
-        });
+    contractorDepts.forEach(d => {
+        if (!supDeptMap.has(d)) supDeptMap.set(d, 'ผู้รับเหมา');
     });
+
+    if (filterType === 'contractor') {
+        return Array.from(supDeptMap.entries()).sort((a, b) => a[0].localeCompare(b[0], 'th'));
+    } else if (filterType === 'employee') {
+        return Array.from(wsbDeptMap.entries()).sort((a, b) => a[0].localeCompare(b[0], 'th'));
+    } else {
+        const merged = new Map([...wsbDeptMap, ...supDeptMap]);
+        return Array.from(merged.entries()).sort((a, b) => a[0].localeCompare(b[0], 'th'));
+    }
+}
+
+// Populate select element with department options
+function populateDepartmentSelect(selectEl, filterType = 'employee', selectedVal = '') {
+    if (!selectEl) return;
+    const isFilter = selectEl.id === 'filter-dept';
+    const placeholder = isFilter 
+        ? '<option value="ALL">ทุกฝ่าย / แผนก ทั้งหมด</option>' 
+        : '<option value="">-- กรุณาเลือกแผนก / ฝ่าย --</option>';
+    selectEl.innerHTML = placeholder;
+
+    const depts = getDepartmentList(filterType);
+    depts.forEach(([name, div]) => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = (div && div !== '-') ? `${name} (${div})` : name;
+        selectEl.appendChild(opt);
+    });
+
+    if (selectedVal) {
+        selectEl.value = selectedVal;
+    }
+}
+
+// Render Department Options in select dropdowns
+function renderDepartmentOptions() {
+    populateDepartmentSelect(document.getElementById('filter-dept'), 'all');
+    populateDepartmentSelect(document.getElementById('f1-dept'), AppState.evaluatorType || 'employee');
+    populateDepartmentSelect(document.getElementById('f2-dept'), AppState.evaluatorType || 'employee');
+    populateDepartmentSelect(document.getElementById('new-emp-dept'), currentNewEvaluatorType || 'employee');
 }
 
 // Default date inputs to today
@@ -946,16 +1149,20 @@ function handleForm1Submit(e) {
         return;
     }
 
-    if (!empName) {
-        alert("กรุณาระบุรหัสพนักงาน");
-        document.getElementById('f1-name').focus();
-        return;
-    }
+    const isContractorSubmit = AppState.evaluatorType === 'contractor' || empName === 'ผู้รับเหมา';
 
-    const empObj = (typeof findEmployeeById === 'function') ? findEmployeeById(empName) : null;
-    if (!empObj && empName !== 'ผู้รับเหมา') {
-        openEmpNotFoundModal();
-        return;
+    if (!isContractorSubmit) {
+        if (!empName) {
+            alert("กรุณาระบุรหัสพนักงาน");
+            document.getElementById('f1-name').focus();
+            return;
+        }
+
+        const empObj = (typeof findEmployeeById === 'function') ? findEmployeeById(empName) : null;
+        if (!empObj) {
+            openEmpNotFoundModal();
+            return;
+        }
     }
 
     // Check all questions answered
@@ -1201,16 +1408,20 @@ function handleForm2Submit(e) {
         return;
     }
 
-    if (!empName) {
-        alert("กรุณาระบุรหัสพนักงาน");
-        document.getElementById('f2-name').focus();
-        return;
-    }
+    const isContractorSubmit = AppState.evaluatorType === 'contractor' || empName === 'ผู้รับเหมา';
 
-    const empObj = (typeof findEmployeeById === 'function') ? findEmployeeById(empName) : null;
-    if (!empObj && empName !== 'ผู้รับเหมา') {
-        openEmpNotFoundModal();
-        return;
+    if (!isContractorSubmit) {
+        if (!empName) {
+            alert("กรุณาระบุรหัสพนักงาน");
+            document.getElementById('f2-name').focus();
+            return;
+        }
+
+        const empObj = (typeof findEmployeeById === 'function') ? findEmployeeById(empName) : null;
+        if (!empObj) {
+            openEmpNotFoundModal();
+            return;
+        }
     }
 
     // Check all questions answered
