@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบแบบประเมินการสื่อสารและประชาสัมพันธ์องค์กร และ แบบสอบถามการประเมินตนเองด้านวัฒนธรรมความปลอดภัยอาหาร (Food Safety Culture) - Eastern Sugar and Cane</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        esc: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js (Local vendor script with CDN fallback) -->
+    <script src="assets/vendor/chart.umd.min.js"></script>
+    <script>
+        if (typeof Chart === 'undefined') {
+            document.write('<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"><\/script>');
+        }
+    </script>
+    <!-- SheetJS (Local vendor script with CDN fallback) -->
+    <script src="assets/vendor/xlsx.full.min.js"></script>
+    <script>
+        if (typeof XLSX === 'undefined') {
+            document.write('<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"><\/script>');
+        }
+    </script>
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 md:h-20">
+                <!-- Brand / Logo -->
+                <div class="flex items-center cursor-pointer" onclick="switchTab('portal')">
+                    <img src="assets/logo_f1.png" alt="Eastern Sugar Logo" class="h-10 md:h-12 w-auto object-contain">
+                </div>
+
+                <!-- Navigation Tabs -->
+                <nav class="hidden md:flex items-center gap-1.5">
+                    <button data-target-tab="portal" class="nav-link px-3.5 py-2 rounded-lg text-sm font-medium nav-active">
+                        🏠 หน้าหลัก
+                    </button>
+                    <button data-target-tab="dashboard" class="nav-link px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 relative">
+                        📊 แดชบอร์ดสรุปผล
+                        <span id="nav-total-count" class="hidden absolute -top-1 -right-1 bg-emerald-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full">0</span>
+                    </button>
+                </nav>
+
+                <!-- Header Actions -->
+                <div class="flex items-center gap-2">
+                    <button onclick="switchTab('dashboard')" class="md:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100" title="แดชบอร์ด">
+                        📊
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Navigation Bar -->
+            <div class="md:hidden flex items-center justify-center border-t border-slate-100 py-2 overflow-x-auto gap-2">
+                <button data-target-tab="portal" class="px-3 py-1.5 rounded-lg text-xs font-semibold nav-active whitespace-nowrap">
+                    หน้าหลัก
+                </button>
+                <button data-target-tab="dashboard" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 whitespace-nowrap">
+                    แดชบอร์ด
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+
+        <!-- ================================================================= -->
+        <!-- VIEW 1: PORTAL / HOME PAGE -->
+        <!-- ================================================================= -->
+        <section id="view-portal" class="fade-in space-y-8">
+            <!-- Welcome Hero -->
+            <div class="bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900 text-white rounded-2xl p-6 md:p-10 shadow-lg relative overflow-hidden">
+                <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-emerald-600/20 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="relative z-10 max-w-3xl">
+                    <span class="inline-flex items-center gap-2 bg-emerald-700/60 text-emerald-200 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider mb-3">
+                        🏢 บริษัท น้ำตาลและอ้อยตะวันออก จำกัด (มหาชน)
+                    </span>
+                    <h2 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight mb-3 leading-snug">
+                        ระบบแบบประเมินการสื่อสารและประชาสัมพันธ์องค์กร และ แบบสอบถามการประเมินตนเองด้านวัฒนธรรมความปลอดภัยอาหาร (Food Safety Culture)
+                    </h2>
+                    <p class="text-emerald-100 text-sm md:text-base leading-relaxed">
+                        ขอเชิญชวนพนักงานทุกฝ่ายร่วมลงคะแนนและแสดงความคิดเห็น เพื่อนำข้อมูลไปปรับปรุงและพัฒนาระบบคุณภาพ วัฒนธรรมความปลอดภัยอาหาร และการสื่อสารภายในองค์กรให้มีประสิทธิภาพสูงสุด
+                    </p>
+                </div>
+            </div>
+
+            <!-- Two Evaluation Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Card 1: Food Safety Culture -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 hover:shadow-md transition flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="bg-emerald-100 text-emerald-800 font-mono text-xs font-bold px-2.5 py-1 rounded-md">
+                                FM-MR12-MR-01 (Rev.00) 25/01/2567
+                            </span>
+                            <span class="text-xs text-slate-500">20 ข้อคำถาม • เต็ม 100 คะแนน</span>
+                        </div>
+                        <h3 class="text-lg md:text-xl font-bold text-slate-800 mb-2">
+                            แบบสอบถามการประเมินตนเอง วัฒนธรรมความปลอดภัยอาหาร (Food Safety Culture)
+                        </h3>
+                        <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                            ประเมินความตระหนักรู้และแนวทางปฏิบัติด้านความปลอดภัยอาหาร 6 ด้านสำคัญ: ความเป็นผู้นำ, การมีส่วนร่วม, การสื่อสาร, ผู้รับผิดชอบ, การอบรมความรู้ และสภาพแวดล้อมสถานประกอบการ
+                        </p>
+                        <div class="bg-emerald-50/70 border border-emerald-100 rounded-xl p-3.5 mb-5 text-xs text-emerald-900 space-y-1">
+                            <div class="font-bold">🎯 วัตถุประสงค์:</div>
+                            <div>• เพื่อทราบถึงจุดอ่อนและจุดแข็งของวัฒนธรรมความปลอดภัยอาหาร</div>
+                            <div>• นำข้อมูลมาปรับปรุงและพัฒนาระบบการปฏิบัติงานให้มีประสิทธิภาพ</div>
+                        </div>
+                    </div>
+                    <button onclick="openEmpIdModal('form1')" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-sm cursor-pointer">
+                        <span>เริ่มทำแบบประเมินนี้</span>
+                        <span>&rarr;</span>
+                    </button>
+                </div>
+
+                <!-- Card 2: Communication & PR -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 hover:shadow-md transition flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="bg-sky-100 text-sky-800 font-mono text-xs font-bold px-2.5 py-1 rounded-md">
+                                FM-MR14-MR-04 Rev.00
+                            </span>
+                            <span class="text-xs text-slate-500">12 ข้อคำถาม • เต็ม 48 คะแนน</span>
+                        </div>
+                        <h3 class="text-lg md:text-xl font-bold text-slate-800 mb-2">
+                            แบบประเมินการสื่อสารและประชาสัมพันธ์
+                        </h3>
+                        <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                            ประเมินประสิทธิผลของการสื่อสารนโยบายคุณภาพ สิ่งแวดล้อม พลังงาน ความปลอดภัย อาหาร มาตรฐานห้องปฏิบัติการ นโยบายบองซูโคร สิทธิมนุษยชน และความรับผิดชอบต่อสังคม
+                        </p>
+                        <div class="bg-sky-50/70 border border-sky-100 rounded-xl p-3.5 mb-5 text-xs text-sky-900 space-y-1">
+                            <div class="font-bold">🎯 วัตถุประสงค์:</div>
+                            <div>• ประเมินการรับรู้ข้อมูลข่าวสารและ KPI ของพนักงานทุกระดับ</div>
+                            <div>• ทบทวนความร่วมมือและการมีส่วนร่วมกับชุมชนและสังคมโดยรอบ</div>
+                        </div>
+                    </div>
+                    <button onclick="openEmpIdModal('form2')" class="w-full bg-sky-700 hover:bg-sky-800 text-white font-bold py-3 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-sm cursor-pointer">
+                        <span>เริ่มทำแบบประเมินนี้</span>
+                        <span>&rarr;</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================================================================= -->
+        <!-- VIEW 2: FORM 1 - FOOD SAFETY CULTURE (FM-MR12-MR-01) -->
+        <!-- ================================================================= -->
+        <section id="view-form1" class="hidden space-y-6">
+            <!-- ISO Document Header Box -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                <div class="border-b border-slate-200 pb-5 mb-5">
+                    <div class="text-xs text-slate-500 font-medium">Eastern Sugar and Cane Public Company Limited</div>
+                    <h2 class="text-lg md:text-xl font-bold text-slate-800">
+                        แบบสอบถามการประเมินตนเอง วัฒนธรรมความปลอดภัยอาหาร (Food Safety Culture)
+                    </h2>
+                </div>
+
+                <!-- Objectives & Instructions -->
+                <div class="bg-emerald-50/70 border border-emerald-200 rounded-xl p-4 text-xs md:text-sm text-emerald-950 space-y-1.5 mb-6">
+                    <div class="font-bold flex items-center gap-1.5 text-emerald-900">
+                        <span>📌</span> วัตถุประสงค์ :
+                    </div>
+                    <p class="pl-5">1. เพื่อให้ทราบถึงจุดอ่อนและจุดแข็งของวัฒนธรรมความปลอดภัยอาหาร (Food Safety Culture)</p>
+                    <p class="pl-5">2. เพื่อนำข้อมูลการประเมินมาปรับปรุงวัฒนธรรมความปลอดภัยอาหาร (Food Safety Culture) และพัฒนาระบบการปฏิบัติงานอย่างมีประสิทธิภาพ</p>
+                    <div class="font-bold flex items-center gap-1.5 text-emerald-900 pt-1">
+                        <span>✏️</span> คำชี้แจง :
+                    </div>
+                    <p class="pl-5">โปรดเลือกตัวเลขในช่องระดับความคิดเห็นของท่าน (5: มากที่สุด, 4: มาก, 3: ปานกลาง, 2: น้อย, 1: น้อยที่สุด)</p>
+                </div>
+
+                <!-- Form Inputs -->
+                <form id="form1-element">
+                    <!-- Evaluator Info -->
+                    <div class="mb-8 bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-200/80">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
+                                <span>👤</span> ข้อมูลผู้ทำแบบประเมิน (กรอกรหัสพนักงาน ข้อมูลอื่นๆ จะขึ้นโดยอัตโนมัติ)
+                            </span>
+                            <span id="f1-emp-status" class="text-xs font-medium text-slate-500">พร้อมใช้งาน</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <!-- Employee ID -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">
+                                    รหัสพนักงาน (Employee ID) <span class="text-rose-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <input 
+                                        type="text" 
+                                        id="f1-name" 
+                                        required 
+                                        autocomplete="off"
+                                        placeholder="ระบุรหัสพนักงาน เช่น 455636" 
+                                        oninput="onFormEmpIdInput(1, this.value)"
+                                        class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white font-medium"
+                                    >
+                                    <span id="f1-id-match-icon" class="hidden absolute right-2.5 top-2.5 text-xs text-emerald-600 font-bold">✓</span>
+                                </div>
+                            </div>
+
+                            <!-- Full Name (Auto-filled) -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">ชื่อ - สกุล (ดึงอัตโนมัติ)</label>
+                                <input 
+                                    type="text" 
+                                    id="f1-fullname" 
+                                    readonly 
+                                    placeholder="ชื่อผู้ประเมิน" 
+                                    class="w-full text-sm px-3 py-2 border border-slate-200 bg-slate-100 text-slate-700 rounded-lg cursor-not-allowed font-medium"
+                                >
+                            </div>
+
+                            <!-- Department (Auto-filled / Selectable) -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">แผนก <span class="text-rose-500">*</span></label>
+                                <select id="f1-dept" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white">
+                                    <!-- Populated dynamically from EMPLOYEE_DATABASE -->
+                                </select>
+                            </div>
+
+                            <!-- Date -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">วันที่ประเมิน <span class="text-rose-500">*</span></label>
+                                <input type="date" id="f1-date" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white">
+                            </div>
+                        </div>
+
+                        <!-- Auto-filled division & group details preview -->
+                        <div id="f1-emp-extra-box" class="hidden text-xs bg-white p-3 rounded-xl border border-emerald-200 text-emerald-950 flex flex-wrap items-center gap-x-4 gap-y-1">
+                            <span>🏢 ฝ่าย: <b id="f1-extra-division" class="text-slate-800">-</b></span>
+                            <span>🧭 สายงาน: <b id="f1-extra-group" class="text-slate-800">-</b></span>
+                            <span>📋 สถานะ: <b id="f1-extra-type" class="text-slate-800">-</b></span>
+                        </div>
+                    </div>
+
+                    <!-- Questions Container (Populated by JS) -->
+                    <div id="f1-questions-container">
+                        <!-- Rendered by renderForm1Questions() -->
+                    </div>
+
+                    <!-- Additional Suggestions -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-5 mb-8 shadow-sm">
+                        <label class="block font-bold text-sm text-slate-800 mb-2 flex items-center gap-2">
+                            <span>💬</span> ข้อเสนอแนะเพิ่มเติมสำหรับการปรับปรุงวัฒนธรรมความปลอดภัยอาหาร:
+                        </label>
+                        <textarea id="f1-comments" rows="3" placeholder="ระบุความคิดเห็นหรือข้อเสนอแนะเพิ่มเติมเพื่อการพัฒนาองค์กร..." class="w-full text-sm p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-slate-50 focus:bg-white transition"></textarea>
+                    </div>
+
+                    <!-- Scoring Criteria Guide Reference -->
+                    <div class="border border-slate-200 rounded-xl overflow-hidden mb-8 bg-slate-50 text-xs">
+                        <div class="bg-slate-200/70 px-4 py-2 font-bold text-slate-700">
+                            เกณฑ์คะแนน เพื่อดูว่าองค์กรยอมรับด้านวัฒนธรรมความปลอดภัยอาหาร (Food Safety Culture) อย่างไร:
+                        </div>
+                        <div class="divide-y divide-slate-200 p-3 space-y-2">
+                            <div class="flex items-start gap-2">
+                                <span class="font-bold font-mono text-emerald-700 w-20 flex-shrink-0">81 - 100 :</span>
+                                <span class="text-slate-700"><b>ยอดเยี่ยม</b> เข้าใจถึงความสำคัญของการปรับปรุงอย่างต่อเนื่องในด้านวัฒนธรรมความปลอดภัยด้านอาหาร สื่อสารกันได้ดี ในทุกระดับ และให้ฝ่ายบริหารเข้ามามีส่วนร่วม</span>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <span class="font-bold font-mono text-blue-700 w-20 flex-shrink-0">61 - 80 :</span>
+                                <span class="text-slate-700"><b>มีความเข้าใจที่ดี</b> เกี่ยวกับความสำคัญด้านวัฒนธรรมความปลอดภัยด้านอาหาร และผลิตภัณฑ์ในองค์กร ให้ความสำคัญในทุกโอกาสที่มี และพยายามดึงดูดพนักงานทุกคน รวมถึงผู้บริหารระดับสูง หัวหน้ากะ และผู้ปฏิบัติงาน เพื่อมุ่งสู่ความเป็นเลิศ</span>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <span class="font-bold font-mono text-amber-700 w-20 flex-shrink-0">41 - 60 :</span>
+                                <span class="text-slate-700"><b>อยู่ในแนวทางที่ดี</b> ในการสร้างด้านวัฒนธรรมความปลอดภัยด้านอาหารเชิงบวกในองค์กร เพื่อดูว่าจะนำแนะไปสู่ระดับต่อไปได้อย่างไร และปรับปรุงวัฒนธรรมอย่างต่อเนื่อง</span>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <span class="font-bold font-mono text-orange-700 w-20 flex-shrink-0">21 - 40 :</span>
+                                <span class="text-slate-700"><b>มีความเข้าใจ</b> และมีประเด็นที่ชัดเจน สำหรับการปรับปรุงด้านวัฒนธรรมความปลอดภัยด้านอาหารในองค์กร</span>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <span class="font-bold font-mono text-rose-700 w-20 flex-shrink-0">0 - 20 :</span>
+                                <span class="text-slate-700"><b>ความเข้าใจต่ำ</b> ในองค์กรเกี่ยวกับความสำคัญของวัฒนธรรมความปลอดภัยด้านอาหารต่ำ อาจทำให้องค์กรตกอยู่ในความเสี่ยง</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Action Bar -->
+                    <div class="sticky bottom-4 z-30 bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-slate-300 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center gap-4 text-xs sm:text-sm">
+                            <div>
+                                <span class="text-slate-500">ตอบแล้ว:</span>
+                                <span id="f1-live-answered" class="font-bold text-slate-800">0 / 20</span>
+                            </div>
+                            <div class="border-l border-slate-200 pl-4">
+                                <span class="text-slate-500">คะแนนรวมสะสม:</span>
+                                <span id="f1-live-score" class="font-extrabold text-emerald-700 text-base sm:text-lg">0</span>
+                                <span class="text-slate-400">/ 100</span>
+                            </div>
+                        </div>
+                        <div id="f1-live-interpretation" class="hidden sm:block flex-grow max-w-md"></div>
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <button type="button" onclick="switchTab('portal')" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
+                                ยกเลิก
+                            </button>
+                            <button type="submit" class="flex-grow sm:flex-grow-0 bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow-md transition flex items-center justify-center gap-2">
+                                <span>💾</span> บันทึกการประเมิน
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+
+        <!-- ================================================================= -->
+        <!-- VIEW 3: FORM 2 - COMMUNICATION & PR (FM-MR14-MR-04) -->
+        <!-- ================================================================= -->
+        <section id="view-form2" class="hidden space-y-6">
+            <!-- ISO Document Header Box -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                <div class="border-b border-slate-200 pb-5 mb-5">
+                    <div class="text-xs text-slate-500 font-medium">Eastern Sugar and Cane Public Company Limited</div>
+                    <h2 class="text-lg md:text-xl font-bold text-slate-800">
+                        แบบประเมินการสื่อสารและประชาสัมพันธ์
+                    </h2>
+                </div>
+
+                <!-- Form Inputs -->
+                <form id="form2-element">
+                    <!-- Evaluator Header Information -->
+                    <div class="mb-8 bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-200/80">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
+                                <span>👤</span> ข้อมูลผู้ทำแบบประเมิน (กรอกรหัสพนักงาน ข้อมูลอื่นๆ จะขึ้นโดยอัตโนมัติ)
+                            </span>
+                            <span id="f2-emp-status" class="text-xs font-medium text-slate-500">พร้อมใช้งาน</span>
+                        </div>
+
+                        <!-- Top row: ID, Name, Dept, Date -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <!-- Employee ID -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">
+                                    รหัสพนักงาน (Employee ID) <span class="text-rose-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <input 
+                                        type="text" 
+                                        id="f2-name" 
+                                        required 
+                                        autocomplete="off"
+                                        placeholder="ระบุรหัสพนักงาน เช่น 589280" 
+                                        oninput="onFormEmpIdInput(2, this.value)"
+                                        class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 bg-white font-medium"
+                                    >
+                                    <span id="f2-id-match-icon" class="hidden absolute right-2.5 top-2.5 text-xs text-sky-600 font-bold">✓</span>
+                                </div>
+                            </div>
+
+                            <!-- Full Name -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">ชื่อ - สกุล (ดึงอัตโนมัติ)</label>
+                                <input 
+                                    type="text" 
+                                    id="f2-fullname" 
+                                    readonly 
+                                    placeholder="ชื่อผู้ประเมิน" 
+                                    class="w-full text-sm px-3 py-2 border border-slate-200 bg-slate-100 text-slate-700 rounded-lg cursor-not-allowed font-medium"
+                                >
+                            </div>
+
+                            <!-- Department -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">แผนก <span class="text-rose-500">*</span></label>
+                                <select id="f2-dept" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 bg-white">
+                                    <!-- Populated dynamically from EMPLOYEE_DATABASE -->
+                                </select>
+                            </div>
+
+                            <!-- Date -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">วันที่ประเมิน <span class="text-rose-500">*</span></label>
+                                <input type="date" id="f2-date" required class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 bg-white">
+                            </div>
+                        </div>
+
+                        <!-- Second row: Group & Division (Auto-filled) -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">สายงาน (ดึงอัตโนมัติ)</label>
+                                <input 
+                                    type="text" 
+                                    id="f2-group" 
+                                    placeholder="สายงาน" 
+                                    class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 bg-white font-medium"
+                                >
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">ฝ่าย (ดึงอัตโนมัติ)</label>
+                                <input 
+                                    type="text" 
+                                    id="f2-division" 
+                                    placeholder="ฝ่าย" 
+                                    class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 bg-white font-medium"
+                                >
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rating Scale Guide -->
+                    <div class="bg-sky-50/70 border border-sky-200 rounded-xl p-4 text-xs md:text-sm text-sky-950 flex flex-wrap items-center justify-between gap-3 mb-6">
+                        <div class="font-bold flex items-center gap-1.5">
+                            <span>ℹ️</span> ระดับคะแนนการประเมิน:
+                        </div>
+                        <div class="flex items-center gap-3 font-medium">
+                            <span class="bg-white px-2 py-1 rounded border border-sky-200"><b>4</b> : ดีมาก</span>
+                            <span class="bg-white px-2 py-1 rounded border border-sky-200"><b>3</b> : ดี</span>
+                            <span class="bg-white px-2 py-1 rounded border border-sky-200"><b>2</b> : พอใช้</span>
+                            <span class="bg-white px-2 py-1 rounded border border-sky-200"><b>1</b> : ปรับปรุง</span>
+                        </div>
+                    </div>
+
+                    <!-- Questions Container (Populated by JS) -->
+                    <div id="f2-questions-container">
+                        <!-- Rendered by renderForm2Questions() -->
+                    </div>
+
+                    <!-- Additional Suggestions -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-5 mb-8 shadow-sm">
+                        <label class="block font-bold text-sm text-slate-800 mb-2 flex items-center gap-2">
+                            <span>💬</span> ข้อเสนอแนะเพิ่มเติม:
+                        </label>
+                        <textarea id="f2-comments" rows="3" placeholder="ระบุข้อเสนอแนะเพิ่มเติมสำหรับการสื่อสารและประชาสัมพันธ์..." class="w-full text-sm p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 bg-slate-50 focus:bg-white transition"></textarea>
+                    </div>
+
+                    <!-- Submit Action Bar -->
+                    <div class="sticky bottom-4 z-30 bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-slate-300 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center gap-4 text-xs sm:text-sm">
+                            <div>
+                                <span class="text-slate-500">ตอบแล้ว:</span>
+                                <span id="f2-live-answered" class="font-bold text-slate-800">0 / 12</span>
+                            </div>
+                            <div class="border-l border-slate-200 pl-4">
+                                <span class="text-slate-500">คะแนนที่ได้:</span>
+                                <span id="f2-live-score" class="font-extrabold text-sky-700 text-base sm:text-lg">0 / 48</span>
+                            </div>
+                            <div class="border-l border-slate-200 pl-4">
+                                <span class="text-slate-500">คิดเป็น:</span>
+                                <span id="f2-live-percent" class="font-extrabold text-emerald-600 text-base sm:text-lg">0.0%</span>
+                            </div>
+                        </div>
+                        <div id="f2-live-interpretation" class="hidden sm:block flex-grow max-w-md"></div>
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <button type="button" onclick="switchTab('portal')" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
+                                ยกเลิก
+                            </button>
+                            <button type="submit" class="flex-grow sm:flex-grow-0 bg-sky-700 hover:bg-sky-800 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow-md transition flex items-center justify-center gap-2">
+                                <span>💾</span> บันทึกการประเมิน
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+
+        <!-- ================================================================= -->
+        <!-- VIEW 4: DASHBOARD & REPORTING -->
+        <!-- ================================================================= -->
+        <section id="view-dashboard" class="hidden space-y-8">
+            <!-- Dashboard Header Toolbar -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+                <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-b border-slate-100 pb-4 mb-4">
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-md">LIVE ANALYTICS</span>
+                            <span id="admin-status-indicator"></span>
+                            <h2 class="text-xl md:text-2xl font-extrabold text-slate-800">แดชบอร์ดสรุปรายงานผลการประเมิน</h2>
+                        </div>
+                        <p class="text-xs md:text-sm text-slate-500 mt-1">
+                            ภาพรวมผลคะแนนการประเมินตนเองวัฒนธรรมความปลอดภัยอาหาร และการสื่อสารประชาสัมพันธ์
+                        </p>
+                    </div>
+
+                    <!-- Admin Actions Toolbar (Visible only when unlocked as Admin) -->
+                    <div id="admin-toolbar-actions" class="hidden flex flex-wrap items-center gap-2 w-full lg:w-auto">
+                        <button id="btn-export-excel" class="px-3 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-xs cursor-pointer">
+                            <span>📗</span> ส่งออก Excel (.xlsx)
+                        </button>
+                        <button id="btn-print-report" class="px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-xs cursor-pointer">
+                            <span>🖨️</span> พิมพ์รายงาน / PDF
+                        </button>
+                        <button id="btn-backup-json" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition cursor-pointer" title="สำรองข้อมูลเป็นไฟล์ JSON">
+                            💾 Backup
+                        </button>
+                        <label class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition cursor-pointer" title="นำเข้าข้อมูลจากไฟล์ JSON">
+                            📂 Import
+                            <input type="file" id="input-import-json" accept=".json" class="hidden">
+                        </label>
+                        <button id="btn-clear-data" class="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold rounded-xl border border-rose-200 transition cursor-pointer" title="ล้างข้อมูลทั้งหมด">
+                            🗑️ ล้างข้อมูล
+                        </button>
+                        <button type="button" onclick="openChangePasswordModal()" class="px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl border border-slate-300 transition flex items-center gap-1.5 shadow-2xs cursor-pointer" title="เปลี่ยนรหัสผ่านแอดมิน">
+                            <span>🔑</span> เปลี่ยนรหัส
+                        </button>
+                        <button type="button" onclick="lockAdminInsights()" class="px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-xs cursor-pointer" title="ออกจากระบบแอดมิน">
+                            <span>🔒</span> ออกจากระบบ
+                        </button>
+                    </div>
+
+                    <!-- General Viewer Shortcut (Visible when in general viewer mode) -->
+                    <div id="viewer-admin-login-btn" class="flex items-center gap-2 w-full lg:w-auto">
+                        <button type="button" onclick="openAdminLoginModal()" class="px-3.5 py-2 bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 text-xs font-semibold rounded-xl border border-slate-200 hover:border-emerald-300 transition flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                            <span>🔒</span> เข้าสู่ระบบแอดมิน (Admin)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filter Controls -->
+                <div id="filter-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 pt-1">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">เลือกแบบประเมิน:</label>
+                        <select id="filter-form-type" class="w-full text-xs px-2.5 py-2 border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:ring-1 focus:ring-emerald-500">
+                            <option value="ALL">แบบประเมินทั้งหมด</option>
+                            <option value="FM-MR12-MR-01">FM-MR12-MR-01 (ความปลอดภัยอาหาร)</option>
+                            <option value="FM-MR14-MR-04">FM-MR14-MR-04 (การสื่อสารฯ)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">กลุ่มผู้ประเมิน:</label>
+                        <select id="filter-user-type" class="w-full text-xs px-2.5 py-2 border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:ring-1 focus:ring-emerald-500 font-medium">
+                            <option value="ALL">ทั้งหมด (พนักงาน & ผู้รับเหมา)</option>
+                            <option value="employee">🏢 พนักงานบริษัท (WSB)</option>
+                            <option value="contractor">👷 ผู้รับเหมาภายใน (Sup)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">เลือกฝ่าย / แผนก:</label>
+                        <select id="filter-dept" class="w-full text-xs px-2.5 py-2 border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:ring-1 focus:ring-emerald-500">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">ตั้งแต่วันที่:</label>
+                        <input type="date" id="filter-start-date" class="w-full text-xs px-2.5 py-2 border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:ring-1 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">ถึงวันที่:</label>
+                        <input type="date" id="filter-end-date" class="w-full text-xs px-2.5 py-2 border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:ring-1 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">ค้นหา (ชื่อ/แผนก/ความเห็น):</label>
+                        <input type="text" id="filter-search" placeholder="พิมพ์เพื่อค้นหา..." class="w-full text-xs px-2.5 py-2 border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:ring-1 focus:ring-emerald-500">
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI Metric Cards Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Card 1: Total Respondents -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-semibold text-slate-500 block uppercase tracking-wider">ผู้ทำแบบประเมินทั้งหมด</span>
+                        <div id="metric-total-count" class="text-2xl md:text-3xl font-extrabold text-slate-800 mt-1">0</div>
+                        <div id="metric-total-breakdown" class="text-[11px] text-slate-500 mt-1 flex items-center gap-1.5 flex-wrap">
+                            <span class="inline-flex items-center gap-0.5">🏢 พนักงาน: <b id="metric-emp-count" class="text-emerald-700">0</b></span>
+                            <span class="text-slate-300">|</span>
+                            <span class="inline-flex items-center gap-0.5">👷 ผู้รับเหมา: <b id="metric-sup-count" class="text-amber-700">0</b></span>
+                        </div>
+                    </div>
+                    <div class="w-12 h-12 bg-emerald-50 text-emerald-700 rounded-xl flex items-center justify-center text-2xl font-bold flex-shrink-0">
+                        👥
+                    </div>
+                </div>
+
+                <!-- Card 2: Food Safety Avg -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-semibold text-slate-500 block uppercase tracking-wider">คะแนนเฉลี่ย Food Safety</span>
+                        <div id="metric-fs-avg" class="text-2xl md:text-3xl font-extrabold text-emerald-700 mt-1">-</div>
+                        <div id="metric-fs-level" class="text-xs text-slate-400 mt-1">ยังไม่มีข้อมูล</div>
+                        <div id="metric-fs-breakdown" class="text-[11px] text-slate-500 mt-1">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                    <div class="w-12 h-12 bg-emerald-50 text-emerald-700 rounded-xl flex items-center justify-center text-2xl font-bold flex-shrink-0">
+                        🛡️
+                    </div>
+                </div>
+
+                <!-- Card 3: Communication Avg -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-semibold text-slate-500 block uppercase tracking-wider">คะแนนเฉลี่ย การสื่อสารฯ</span>
+                        <div id="metric-com-avg" class="text-2xl md:text-3xl font-extrabold text-sky-700 mt-1">-</div>
+                        <div id="metric-com-level" class="text-xs text-slate-400 mt-1">ยังไม่มีข้อมูล</div>
+                        <div id="metric-com-breakdown" class="text-[11px] text-slate-500 mt-1">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                    <div class="w-12 h-12 bg-sky-50 text-sky-700 rounded-xl flex items-center justify-center text-2xl font-bold flex-shrink-0">
+                        📢
+                    </div>
+                </div>
+
+                <!-- Card 4: Departments Count -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-semibold text-slate-500 block uppercase tracking-wider">ฝ่าย/แผนกที่ร่วมประเมิน</span>
+                        <div id="metric-dept-count" class="text-2xl md:text-3xl font-extrabold text-slate-800 mt-1">0 แผนก</div>
+                        <span id="metric-dept-subtext" class="text-xs text-slate-400 mt-1 block">ครอบคลุมทั้ง WSB & ผู้รับเหมา</span>
+                    </div>
+                    <div class="w-12 h-12 bg-amber-50 text-amber-700 rounded-xl flex items-center justify-center text-2xl font-bold flex-shrink-0">
+                        🏢
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Chart 1: Food Safety Radar (6 Dimensions) -->
+                <div class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200 shadow-xs">
+                    <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                        <div>
+                            <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
+                                <span>🕸️</span> วัฒนธรรมความปลอดภัยอาหาร: 6 มิติ (Radar Analysis)
+                            </h3>
+                            <p class="text-xs text-slate-500">เปรียบเทียบคะแนนเฉลี่ย 6 มิติ (พนักงาน WSB vs ผู้รับเหมา Sup) เต็ม 5.0</p>
+                        </div>
+                    </div>
+                    <div class="h-72 md:h-80 relative">
+                        <canvas id="chart-radar-fsc"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Communication Items Bar Chart -->
+                <div class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200 shadow-xs">
+                    <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                        <div>
+                            <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
+                                <span>📊</span> การสื่อสารและประชาสัมพันธ์: คะแนนเฉลี่ยรายข้อ
+                            </h3>
+                            <p class="text-xs text-slate-500">เปรียบเทียบคะแนนเฉลี่ยข้อที่ 1 ถึง 12 แยกกลุ่ม พนักงาน / ผู้รับเหมา (เต็ม 4.0)</p>
+                        </div>
+                    </div>
+                    <div class="h-72 md:h-80 relative">
+                        <canvas id="chart-bar-communication"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 3: Result Distribution Doughnut -->
+                <div class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200 shadow-xs">
+                    <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                        <div>
+                            <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
+                                <span>🍩</span> สัดส่วนกลุ่มผู้ประเมิน & ระดับผลการประเมิน
+                            </h3>
+                            <p class="text-xs text-slate-500">สัดส่วนผู้เข้าร่วมประเมิน (พนักงาน vs ผู้รับเหมา) และระดับผลลัพธ์</p>
+                        </div>
+                    </div>
+                    <div class="h-72 md:h-80 relative">
+                        <canvas id="chart-donut-distribution"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 4: Employee vs Contractor Comparison Bar Chart -->
+                <div class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200 shadow-xs">
+                    <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                        <div>
+                            <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
+                                <span>⚖️</span> เปรียบเทียบคะแนน พนักงาน WSB vs ผู้รับเหมา Sup
+                            </h3>
+                            <p class="text-xs text-slate-500">เปรียบเทียบคะแนนเฉลี่ยร้อยละ (%) ในแต่ละแบบประเมิน</p>
+                        </div>
+                    </div>
+                    <div class="h-72 md:h-80 relative">
+                        <canvas id="chart-bar-emp-compare"></canvas>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ============================================================= -->
+            <!-- ADMIN RESTRICTED DEEP INSIGHTS SECTION -->
+            <!-- ============================================================= -->
+            <div id="admin-insights-section" class="mt-8 space-y-6">
+                <!-- Admin Unlocked Container (shown only when Admin authenticated) -->
+                <div id="admin-unlocked-container" class="space-y-6 hidden">
+
+                    <!-- Chart 5: Department Comparison (Full width) -->
+                    <div class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200 shadow-xs">
+                        <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                            <div>
+                                <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
+                                    <span>🏢</span> เปรียบเทียบคะแนนเฉลี่ยแยกตามฝ่าย / แผนก
+                                </h3>
+                                <p class="text-xs text-slate-500">คะแนนเฉลี่ยภาพรวมของแต่ละฝ่าย / แผนก (%)</p>
+                            </div>
+                        </div>
+                        <div class="h-72 md:h-80 relative">
+                            <canvas id="chart-bar-dept-compare"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Suggestions Feed & Submissions Table Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Suggestions Feed (1 Col) -->
+                        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col">
+                            <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                                <h3 class="font-bold text-sm text-slate-800 flex items-center gap-2">
+                                    <span>💬</span> ข้อเสนอแนะและความคิดเห็น
+                                </h3>
+                                <span class="text-xs text-slate-500">จากพนักงาน & ผู้รับเหมา</span>
+                            </div>
+                            <div id="suggestions-container" class="flex-grow max-h-96 overflow-y-auto">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Submissions History Table (2 Cols) -->
+                        <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col">
+                            <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                                <h3 class="font-bold text-sm text-slate-800 flex items-center gap-2">
+                                    <span>📋</span> รายการบันทึกผลการประเมินย้อนหลัง
+                                </h3>
+                                <span class="text-xs text-slate-500">คลิก 🔍 เพื่อดูผลรายข้อ</span>
+                            </div>
+                            <div class="overflow-x-auto max-h-96 overflow-y-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-100/70 text-[11px] font-bold text-slate-600 uppercase tracking-wider border-b border-slate-200">
+                                            <th class="py-2.5 px-3">วันที่</th>
+                                            <th class="py-2.5 px-3">แบบประเมิน</th>
+                                            <th class="py-2.5 px-3">ประเภท</th>
+                                            <th class="py-2.5 px-3">แผนก</th>
+                                            <th class="py-2.5 px-3">ผู้ประเมิน</th>
+                                            <th class="py-2.5 px-3">คะแนน</th>
+                                            <th class="py-2.5 px-3">ผลประเมิน</th>
+                                            <th class="py-2.5 px-3 text-center">จัดการ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="submissions-tbody">
+                                        <!-- Populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+
+
+
+    <!-- ================================================================= -->
+    <!-- MODALS -->
+    <!-- ================================================================= -->
+
+    <!-- Employee ID Input Modal -->
+    <div id="emp-id-modal" onclick="if(event.target === this) closeEmpIdModal()" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 md:p-8 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <!-- Icon -->
+            <div class="w-16 h-16 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 shadow-xs">
+                🪪
+            </div>
+            
+            <div class="text-center mb-5">
+                <h3 class="text-xl font-bold text-slate-800 mb-1">ข้อมูลผู้ทำแบบประเมิน</h3>
+                <div id="emp-modal-badge" class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100 mb-2">
+                    แบบประเมิน
+                </div>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    กรุณาเลือกประเภทและระบุข้อมูลของท่านก่อนเข้าทำแบบประเมิน
+                </p>
+            </div>
+
+            <!-- Role Selector: Employee vs Contractor -->
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">ท่านคือ : <span class="text-rose-500">*</span></label>
+                <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+                    <button 
+                        type="button" 
+                        id="tab-btn-emp" 
+                        onclick="setEvaluatorType('employee')"
+                        class="py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition shadow-xs bg-white text-emerald-800 border border-emerald-200"
+                    >
+                        <span>👔</span>
+                        <span>พนักงานบริษัท</span>
+                    </button>
+                    <button 
+                        type="button" 
+                        id="tab-btn-sup" 
+                        onclick="setEvaluatorType('contractor')"
+                        class="py-2.5 px-3 rounded-xl font-semibold text-xs flex items-center justify-center gap-1.5 transition text-slate-600 hover:text-slate-900"
+                    >
+                        <span>👷</span>
+                        <span>ผู้รับเหมา</span>
+                    </button>
+                </div>
+            </div>
+
+            <form id="emp-id-form" onsubmit="confirmEmployeeId(event)" class="space-y-4">
+                <!-- Case 1: Employee (6-digit ID) -->
+                <div id="container-emp-input">
+                    <label for="input-emp-id" class="block text-xs font-bold text-slate-700 mb-1.5">
+                        รหัสพนักงาน 6 หลัก <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 text-sm pointer-events-none">
+                            👤
+                        </span>
+                        <input 
+                            type="text" 
+                            id="input-emp-id" 
+                            maxlength="6"
+                            inputmode="numeric"
+                            autocomplete="off"
+                            placeholder="กรอกรหัสพนักงาน 6 หลัก (เช่น 455636)"
+                            oninput="onModalEmpIdInput(this.value)"
+                            class="w-full text-sm pl-10 pr-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition bg-slate-50 focus:bg-white font-medium tracking-wide"
+                        >
+                    </div>
+                    <p id="emp-id-hint" class="text-[11px] text-slate-400 mt-1">ตัวอย่างรหัส 6 หลัก เช่น 455636, 589280, 639003</p>
+                </div>
+
+                <!-- Case 2: Contractor (Dropdown from Excel) -->
+                <div id="container-sup-select" class="hidden">
+                    <label for="select-sup-name" class="block text-xs font-bold text-slate-700 mb-1.5">
+                        เลือกรายชื่อผู้รับเหมา <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <select 
+                            id="select-sup-name"
+                            onchange="onModalSupSelect(this.value)"
+                            class="w-full text-sm px-3 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition bg-white font-medium"
+                        >
+                            <option value="">-- กรุณาเลือกรายชื่อผู้รับเหมา --</option>
+                            <!-- Populated dynamically from EMPLOYEE_DATABASE Sup records -->
+                        </select>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-1">รายชื่อจากไฟล์ "รายชื่อพนักกงาน WSBและSupภายใน.xlsx"</p>
+                </div>
+
+                <p id="emp-id-error" class="hidden text-xs text-rose-500 mt-1 flex items-center gap-1 font-medium">
+                    ⚠️ กรุณาระบุรหัสพนักงาน 6 หลัก
+                </p>
+
+                <!-- Live Employee / Contractor Lookup Preview in Modal -->
+                <div id="modal-emp-preview" class="hidden mt-3 p-3 bg-emerald-50/80 border border-emerald-200 rounded-xl text-xs space-y-1">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-emerald-900" id="modal-preview-name">-</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-200/80 text-emerald-800" id="modal-preview-badge">WSB</span>
+                    </div>
+                    <div class="text-slate-600 flex flex-wrap gap-x-2 gap-y-0.5">
+                        <span>แผนก: <b class="text-slate-800" id="modal-preview-dept">-</b></span>
+                        <span id="modal-preview-division-box">• ฝ่าย: <b class="text-slate-800" id="modal-preview-division">-</b></span>
+                    </div>
+                </div>
+
+                <div class="bg-emerald-50/60 border border-emerald-100 rounded-xl p-3 text-xs text-emerald-900 flex items-start gap-2 leading-relaxed">
+                    <span class="text-emerald-700 font-bold flex-shrink-0">🔒</span>
+                    <span>ข้อมูลนี้จะถูกบันทึกคู่กับข้อมูลการประเมินเพื่อใช้ในการสรุปผลรายงาน</span>
+                </div>
+
+                <div class="flex items-center gap-2.5 pt-2">
+                    <button 
+                        type="button" 
+                        onclick="closeEmpIdModal()" 
+                        class="w-1/2 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold text-sm transition text-center"
+                    >
+                        ยกเลิก
+                    </button>
+                    <button 
+                        type="submit" 
+                        class="w-1/2 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-1.5"
+                    >
+                        <span>เข้าสู่แบบประเมิน</span>
+                        <span>&rarr;</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">
+                🎉
+            </div>
+            <h3 id="modal-title" class="text-xl font-bold text-center text-slate-800 mb-1">บันทึกผลการประเมินสำเร็จ!</h3>
+            <p id="modal-code" class="text-xs text-center font-mono text-slate-400 mb-5"></p>
+
+            <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 mb-6 space-y-3">
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-slate-500">แผนก:</span>
+                    <span id="modal-dept" class="font-bold text-slate-800"></span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-slate-500">วันที่ประเมิน:</span>
+                    <span id="modal-date" class="font-mono text-slate-600"></span>
+                </div>
+                <div class="border-t border-slate-200 pt-3 flex items-center justify-between">
+                    <span class="text-sm font-semibold text-slate-700">คะแนนที่ได้:</span>
+                    <span id="modal-score" class="text-lg font-extrabold text-emerald-700"></span>
+                </div>
+                <div class="p-3 bg-white rounded-xl border border-slate-200">
+                    <div id="modal-level" class="font-bold text-sm text-slate-800 mb-0.5"></div>
+                    <div id="modal-desc" class="text-xs text-slate-600 leading-relaxed"></div>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center gap-2.5">
+                <button id="btn-modal-go-dashboard" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-2.5 rounded-xl text-sm transition">
+                    📊 เปิดดูแดชบอร์ดสรุปผล
+                </button>
+                <button id="btn-modal-go-next" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-sm transition">
+                    📝 ทำอีกแบบประเมิน
+                </button>
+                <button id="btn-close-modal" class="w-full sm:w-auto px-4 py-2.5 text-slate-500 hover:text-slate-700 text-sm font-medium">
+                    ปิด
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Evaluation Modal -->
+    <div id="detail-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div id="detail-modal-content" class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <!-- Injected by viewEvaluationDetail() -->
+        </div>
+    </div>
+
+    <!-- QR Code & Link Sharing Modal -->
+    <div id="qr-modal" onclick="if(event.target === this) closeQRModal()" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-xl w-full max-h-[92vh] overflow-y-auto p-6 md:p-8 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-emerald-50 text-emerald-700 rounded-2xl flex items-center justify-center text-2xl border border-emerald-100 shadow-xs">
+                        📲
+                    </div>
+                    <div>
+                        <h3 class="text-lg md:text-xl font-bold text-slate-800">ส่งลิงก์ & คิวอาร์โค้ดให้พนักงาน</h3>
+                        <p class="text-xs text-slate-500">สแกนทำแบบประเมินผ่านมือถือหรือคลิกลิงก์บนคอมพิวเตอร์</p>
+                    </div>
+                </div>
+                <button onclick="closeQRModal()" class="text-slate-400 hover:text-slate-600 p-2 rounded-xl hover:bg-slate-100 transition text-lg" title="ปิด">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Tabs: Select Target Form -->
+            <div class="mt-4 bg-slate-100 p-1.5 rounded-2xl grid grid-cols-3 gap-1 text-xs">
+                <button id="qr-tab-portal" onclick="selectQRTarget('portal')" class="py-2 px-2 rounded-xl transition text-center cursor-pointer bg-white text-emerald-800 shadow-xs font-bold">
+                    🌐 หน้าหลักรวม
+                </button>
+                <button id="qr-tab-form1" onclick="selectQRTarget('form1')" class="py-2 px-2 rounded-xl transition text-center cursor-pointer text-slate-600 hover:text-slate-900 font-medium">
+                    🥗 Food Safety
+                </button>
+                <button id="qr-tab-form2" onclick="selectQRTarget('form2')" class="py-2 px-2 rounded-xl transition text-center cursor-pointer text-slate-600 hover:text-slate-900 font-medium">
+                    📢 การสื่อสารฯ
+                </button>
+            </div>
+
+            <!-- Target Banner -->
+            <div class="mt-4 p-3.5 bg-emerald-50/70 rounded-2xl border border-emerald-100/80 flex items-center gap-3">
+                <div id="qr-target-icon" class="text-2xl shrink-0">🌐</div>
+                <div class="min-w-0">
+                    <h4 id="qr-target-title" class="text-sm font-bold text-emerald-950 truncate">หน้าหลักรวมระบบแบบประเมินพนักงาน</h4>
+                    <p id="qr-target-desc" class="text-[11px] text-emerald-700 leading-tight line-clamp-2">ให้พนักงานเลือกทำได้ทั้งแบบประเมิน Food Safety และ การสื่อสารประชาสัมพันธ์</p>
+                </div>
+            </div>
+
+            <!-- Host Mode Selector -->
+            <div class="mt-4 p-3 bg-slate-50 rounded-2xl border border-slate-200/70">
+                <div class="text-[11px] font-bold text-slate-600 mb-2 flex items-center justify-between">
+                    <span>📡 รูปแบบการเชื่อมต่อ (Host Mode):</span>
+                    <span class="text-[10px] text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-full font-medium">เลือกให้เหมาะกับช่องทางส่ง</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                    <label class="flex items-center gap-2 p-2 rounded-xl bg-white border border-slate-200 cursor-pointer hover:border-emerald-400 transition">
+                        <input type="radio" name="qr-host-mode" value="cloud" checked onchange="onQRHostModeChange('cloud')" class="text-emerald-600 focus:ring-emerald-500">
+                        <div class="min-w-0">
+                            <div class="font-bold text-slate-800">☁️ ออนไลน์ (Cloudflare)</div>
+                            <div class="text-[10px] text-slate-400">ใช้เน็ตมือถือ 4G/5G จากที่ไหนก็ได้</div>
+                        </div>
+                    </label>
+                    <label class="flex items-center gap-2 p-2 rounded-xl bg-white border border-slate-200 cursor-pointer hover:border-emerald-400 transition">
+                        <input type="radio" name="qr-host-mode" value="lan" onchange="onQRHostModeChange('lan')" class="text-emerald-600 focus:ring-emerald-500">
+                        <div class="min-w-0">
+                            <div class="font-bold text-slate-800">🏢 ในบริษัท (Wi-Fi/LAN)</div>
+                            <div class="text-[10px] text-slate-400">192.168.121.65 (วงเครือข่ายบริษัท)</div>
+                        </div>
+                    </label>
+                </div>
+                <div class="mt-2 text-[10px] text-slate-400 flex items-center justify-between px-1">
+                    <span>เบราว์เซอร์ปัจจุบัน: <span id="current-host-display" class="font-mono text-slate-600">localhost</span></span>
+                    <button type="button" onclick="onQRHostModeChange('current')" class="text-emerald-700 hover:underline">ใช้โฮสต์ปัจจุบัน</button>
+                </div>
+            </div>
+
+            <!-- QR Code Box -->
+            <div class="mt-4 flex flex-col items-center justify-center p-4 bg-white rounded-2xl border border-slate-200/80 shadow-2xs">
+                <div class="p-3 bg-white rounded-2xl border-2 border-emerald-600/30 shadow-xs inline-block">
+                    <img id="qr-code-img" src="assets/qrcode_portal.png" alt="QR Code สำหรับแบบประเมิน" class="w-48 h-48 sm:w-56 sm:h-56 object-contain rounded-lg">
+                </div>
+                <p class="text-[11px] text-slate-400 mt-2">เปิดกล้องมือถือสแกนคิวอาร์โค้ดเพื่อเข้าสู่แบบประเมินทันที</p>
+            </div>
+
+            <!-- Copy URL Field -->
+            <div class="mt-4">
+                <label class="block text-xs font-bold text-slate-700 mb-1">🔗 ลิงก์สำหรับส่งทาง LINE หรือ Email:</label>
+                <div class="flex items-center gap-2">
+                    <input 
+                        type="text" 
+                        id="qr-url-input" 
+                        readonly 
+                        class="w-full text-xs font-mono bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-slate-700 outline-none select-all"
+                        value="https://terrorism-medium-kevin-eric.trycloudflare.com"
+                    >
+                    <button 
+                        id="btn-copy-qr-url" 
+                        onclick="copyEvaluationLink()" 
+                        class="shrink-0 px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                    >
+                        <span id="copy-btn-icon">📋</span>
+                        <span id="copy-btn-text">คัดลอกลิงก์</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Action Buttons -->
+            <div class="mt-5 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <button onclick="downloadQRCodeImage()" class="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
+                        <span>📥</span> ดาวน์โหลด QR (PNG)
+                    </button>
+                    <button onclick="printQRCodePoster()" class="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
+                        <span>🖨️</span> พิมพ์โปสเตอร์ A4
+                    </button>
+                </div>
+                <button onclick="closeQRModal()" class="w-full sm:w-auto px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition">
+                    ปิดหน้าต่าง
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="admin-login-modal" onclick="if(event.target === this) closeAdminLoginModal()" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 md:p-8 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <div class="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4 border border-amber-200 shadow-xs">
+                🔒
+            </div>
+            <h3 class="text-lg md:text-xl font-bold text-center text-slate-800 mb-1">
+                เข้าสู่ระบบผู้ดูแลระบบ (Admin Login)
+            </h3>
+            <p class="text-xs text-center text-slate-500 mb-5 leading-relaxed">
+                กรุณากรอกรหัสผ่านเพื่อเข้าดูข้อมูลเชิงลึกและจัดการข้อมูลในแดชบอร์ด
+            </p>
+
+            <form id="admin-login-modal-form" onsubmit="handleAdminLoginModalSubmit(event)" class="space-y-3.5">
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 text-sm pointer-events-none">
+                        🔑
+                    </span>
+                    <input 
+                        type="password" 
+                        id="modal-admin-passcode-input" 
+                        placeholder="กรอกรหัสผ่านแอดมิน..." 
+                        autocomplete="current-password"
+                        class="w-full text-sm pl-10 pr-10 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white font-medium transition shadow-2xs"
+                    >
+                    <button 
+                        type="button" 
+                        onclick="toggleAdminPassVisibility('modal-admin-passcode-input', 'modal-admin-pass-toggle-icon')" 
+                        class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 text-sm cursor-pointer"
+                        title="แสดง/ซ่อนรหัสผ่าน"
+                        tabindex="-1"
+                    >
+                        <span id="modal-admin-pass-toggle-icon">👁️</span>
+                    </button>
+                </div>
+
+                <div id="modal-admin-lock-error" class="hidden text-xs text-rose-600 font-semibold bg-rose-50 border border-rose-200 rounded-xl p-2.5 flex items-center justify-center gap-1.5">
+                    <span>⚠️</span>
+                    <span>รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง</span>
+                </div>
+
+                <div class="flex items-center gap-2 pt-1">
+                    <button 
+                        type="button" 
+                        onclick="closeAdminLoginModal()" 
+                        class="w-1/3 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold text-sm transition"
+                    >
+                        ยกเลิก
+                    </button>
+                    <button 
+                        type="submit" 
+                        class="w-2/3 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                        <span>🔓 เข้าสู่ระบบ</span>
+                    </button>
+                </div>
+
+                <div class="text-center text-[11px] text-slate-400 pt-1">
+                    (รหัสผ่านเริ่มต้น: <span class="font-mono font-bold text-slate-600">admin1234</span>)
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Admin Password Modal -->
+    <div id="change-pass-modal" onclick="if(event.target === this) closeChangePasswordModal()" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 md:p-8 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <div class="w-14 h-14 bg-emerald-50 text-emerald-700 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4 border border-emerald-100 shadow-xs">
+                🔑
+            </div>
+            <h3 class="text-lg md:text-xl font-bold text-center text-slate-800 mb-1">ตั้งค่ารหัสผ่านแอดมิน</h3>
+            <p class="text-xs text-center text-slate-500 mb-5 leading-relaxed">
+                เปลี่ยนรหัสผ่านสำหรับการเข้าดูข้อมูลเชิงลึกในแดชบอร์ด
+            </p>
+
+            <form id="change-pass-form" onsubmit="handleChangePassword(event)" class="space-y-3.5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">รหัสผ่านปัจจุบัน:</label>
+                    <input type="password" id="input-old-pass" required placeholder="กรอกรหัสผ่านเดิม (ค่าเริ่มต้น admin1234)" class="w-full text-sm px-3.5 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">รหัสผ่านใหม่:</label>
+                    <input type="password" id="input-new-pass" required minlength="4" placeholder="กรอกรหัสผ่านใหม่ (อย่างน้อย 4 ตัวอักษร)" class="w-full text-sm px-3.5 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">ยืนยันรหัสผ่านใหม่:</label>
+                    <input type="password" id="input-confirm-pass" required minlength="4" placeholder="กรอกรหัสผ่านใหม่อีกครั้งเพื่อยืนยัน" class="w-full text-sm px-3.5 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+
+                <div id="change-pass-error" class="hidden text-xs text-rose-600 font-semibold bg-rose-50 border border-rose-200 rounded-xl p-2.5"></div>
+                <div id="change-pass-success" class="hidden text-xs text-emerald-700 font-semibold bg-emerald-50 border border-emerald-200 rounded-xl p-2.5"></div>
+
+                <div class="flex items-center gap-2 pt-2">
+                    <button type="button" onclick="closeChangePasswordModal()" class="w-1/2 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold text-sm transition">
+                        ยกเลิก
+                    </button>
+                    <button type="submit" class="w-1/2 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm shadow-md transition">
+                        บันทึกรหัสผ่านใหม่
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <!-- Firebase App & Firestore Compat SDKs (v10) -->
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/employees.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
