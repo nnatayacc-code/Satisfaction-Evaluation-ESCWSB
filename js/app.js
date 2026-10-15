@@ -336,10 +336,8 @@ function setEvaluatorType(type) {
     const input = document.getElementById('input-emp-id');
     const selSup = document.getElementById('select-sup-name');
     const errorEl = document.getElementById('emp-id-error');
-    const previewEl = document.getElementById('modal-emp-preview');
 
     if (errorEl) errorEl.classList.add('hidden');
-    if (previewEl) previewEl.classList.add('hidden');
 
     if (type === 'employee') {
         if (btnEmp) {
@@ -355,7 +353,6 @@ function setEvaluatorType(type) {
             input.value = AppState.currentEmployeeId && AppState.currentEmployeeId !== 'ผู้รับเหมา' ? AppState.currentEmployeeId : '';
             setTimeout(() => {
                 input.focus();
-                if (input.value) onModalEmpIdInput(input.value);
             }, 80);
         }
     } else {
@@ -372,7 +369,6 @@ function setEvaluatorType(type) {
         if (selSup) {
             if (AppState.selectedContractor) {
                 selSup.value = AppState.selectedContractor.fullName;
-                onModalSupSelect(selSup.value);
             }
             setTimeout(() => selSup.focus(), 80);
         }
@@ -405,37 +401,16 @@ function renderContractorOptions() {
 
 // Handler when contractor name is selected in dropdown
 function onModalSupSelect(fullName) {
-    const previewEl = document.getElementById('modal-emp-preview');
-    const nameEl = document.getElementById('modal-preview-name');
-    const badgeEl = document.getElementById('modal-preview-badge');
-    const deptEl = document.getElementById('modal-preview-dept');
-    const divEl = document.getElementById('modal-preview-division');
-    const divBox = document.getElementById('modal-preview-division-box');
     const errEl = document.getElementById('emp-id-error');
-
     if (errEl) errEl.classList.add('hidden');
-    if (!previewEl) return;
 
     if (!fullName) {
-        previewEl.classList.add('hidden');
         AppState.selectedContractor = null;
         return;
     }
 
     const contractor = EMPLOYEE_DATABASE.find(e => (e.sheet === 'Sup' || e.sheet === 'sup') && e.fullName === fullName);
-
-    if (contractor) {
-        AppState.selectedContractor = contractor;
-        previewEl.classList.remove('hidden');
-        if (nameEl) nameEl.textContent = contractor.fullName;
-        if (badgeEl) badgeEl.textContent = 'ผู้รับเหมา (Sup)';
-        if (deptEl) deptEl.textContent = contractor.dept || 'ผู้รับเหมา';
-        if (divEl) divEl.textContent = contractor.division && contractor.division !== '-' ? contractor.division : 'งานภายนอก/บริการ';
-        if (divBox) divBox.style.display = 'inline';
-    } else {
-        previewEl.classList.add('hidden');
-        AppState.selectedContractor = null;
-    }
+    AppState.selectedContractor = contractor || null;
 }
 
 // Close Employee ID Modal
@@ -445,6 +420,25 @@ function closeEmpIdModal() {
     AppState.pendingEvaluationTab = null;
     const errorEl = document.getElementById('emp-id-error');
     if (errorEl) errorEl.classList.add('hidden');
+}
+
+// Open "Employee Not Found" Alert Modal
+function openEmpNotFoundModal() {
+    const modal = document.getElementById('emp-not-found-modal');
+    if (modal) modal.classList.remove('hidden');
+}
+
+// Close "Employee Not Found" Alert Modal & Refocus input
+function closeEmpNotFoundModal() {
+    const modal = document.getElementById('emp-not-found-modal');
+    if (modal) modal.classList.add('hidden');
+    
+    // Focus and select the input to let user enter correct ID immediately
+    const input = document.getElementById('input-emp-id');
+    if (input) {
+        input.value = '';
+        setTimeout(() => input.focus(), 60);
+    }
 }
 
 // Confirm Employee ID / Contractor and proceed to evaluation
@@ -457,7 +451,7 @@ function confirmEmployeeId(e) {
         const input = document.getElementById('input-emp-id');
         const val = input ? input.value.trim() : '';
 
-        // Validation: Must be 6 digits
+        // Validation 1: Must be 6 digits
         if (!val || val.length !== 6 || !/^\d{6}$/.test(val)) {
             if (errorEl) {
                 errorEl.textContent = '⚠️ กรุณาระบุรหัสพนักงานให้ครบ 6 หลัก (เช่น 455636)';
@@ -467,10 +461,16 @@ function confirmEmployeeId(e) {
             return;
         }
 
+        // Validation 2: Check if employee ID exists in EMPLOYEE_DATABASE ("รายชื่อพนักกงาน WSBและSupภายใน")
+        const emp = (typeof findEmployeeById === 'function') ? findEmployeeById(val) : null;
+        if (!emp) {
+            // Employee ID not found in file -> show popup alert window
+            openEmpNotFoundModal();
+            return;
+        }
+
         if (errorEl) errorEl.classList.add('hidden');
         AppState.currentEmployeeId = val;
-
-        const emp = (typeof findEmployeeById === 'function') ? findEmployeeById(val) : null;
 
         if (targetTab === 'form1') {
             const f1Name = document.getElementById('f1-name');
@@ -495,9 +495,13 @@ function confirmEmployeeId(e) {
             return;
         }
 
-        if (errorEl) errorEl.classList.add('hidden');
-        const contractor = AppState.selectedContractor || EMPLOYEE_DATABASE.find(e => (e.sheet === 'Sup' || e.sheet === 'sup') && e.fullName === fullName);
+        const contractor = AppState.selectedContractor || (typeof EMPLOYEE_DATABASE !== 'undefined' ? EMPLOYEE_DATABASE.find(e => (e.sheet === 'Sup' || e.sheet === 'sup') && e.fullName === fullName) : null);
+        if (!contractor) {
+            openEmpNotFoundModal();
+            return;
+        }
 
+        if (errorEl) errorEl.classList.add('hidden');
         AppState.currentEmployeeId = 'ผู้รับเหมา';
 
         if (targetTab === 'form1') {
@@ -517,34 +521,8 @@ function confirmEmployeeId(e) {
 
 // Live lookup handler when typing Employee ID in modal
 function onModalEmpIdInput(val) {
-    const previewEl = document.getElementById('modal-emp-preview');
-    const nameEl = document.getElementById('modal-preview-name');
-    const badgeEl = document.getElementById('modal-preview-badge');
-    const deptEl = document.getElementById('modal-preview-dept');
-    const divEl = document.getElementById('modal-preview-division');
-    const divBox = document.getElementById('modal-preview-division-box');
     const errEl = document.getElementById('emp-id-error');
-
     if (errEl) errEl.classList.add('hidden');
-    if (!previewEl) return;
-
-    const trimmed = (val || '').trim();
-    if (!trimmed || trimmed.length < 3) {
-        previewEl.classList.add('hidden');
-        return;
-    }
-
-    const emp = (typeof findEmployeeById === 'function') ? findEmployeeById(trimmed) : null;
-    if (emp) {
-        previewEl.classList.remove('hidden');
-        if (nameEl) nameEl.textContent = emp.fullName || emp.firstName || emp.id;
-        if (badgeEl) badgeEl.textContent = emp.sheet === 'Sup' ? 'ผู้รับเหมา (Sup)' : 'พนักงาน (WSB)';
-        if (deptEl) deptEl.textContent = emp.dept || '-';
-        if (divEl) divEl.textContent = emp.division || emp.group || '-';
-        if (divBox) divBox.style.display = (emp.division || emp.group) ? 'inline' : 'none';
-    } else {
-        previewEl.classList.add('hidden');
-    }
 }
 
 // Live lookup handler when typing Employee ID directly in Form 1 or Form 2
@@ -850,6 +828,12 @@ function handleForm1Submit(e) {
         return;
     }
 
+    const empObj = (typeof findEmployeeById === 'function') ? findEmployeeById(empName) : null;
+    if (!empObj && empName !== 'ผู้รับเหมา') {
+        openEmpNotFoundModal();
+        return;
+    }
+
     // Check all questions answered
     const answers = {};
     let totalScore = 0;
@@ -1096,6 +1080,12 @@ function handleForm2Submit(e) {
     if (!empName) {
         alert("กรุณาระบุรหัสพนักงาน");
         document.getElementById('f2-name').focus();
+        return;
+    }
+
+    const empObj = (typeof findEmployeeById === 'function') ? findEmployeeById(empName) : null;
+    if (!empObj && empName !== 'ผู้รับเหมา') {
+        openEmpNotFoundModal();
         return;
     }
 
@@ -2775,6 +2765,7 @@ function setupEventListeners() {
             closeChangePasswordModal();
             closeAdminLoginModal();
             closeQRModal();
+            closeEmpNotFoundModal();
         }
     });
 
