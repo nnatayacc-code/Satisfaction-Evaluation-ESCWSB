@@ -449,6 +449,94 @@ function closeEmpIdModal() {
     if (errorEl) errorEl.classList.add('hidden');
 }
 
+// -------------------------------------------------------------------------
+// Duplicate Evaluation Detection & Modal Handling (ไม่ให้ผู้ประเมินทำซ้ำ)
+// -------------------------------------------------------------------------
+let duplicateAttemptOtherForm = null;
+
+/**
+ * Check if evaluator has already submitted an evaluation for this form
+ * @param {string} formType - 'form1' | 'form2' | 'FM-MR12-MR-01' | 'FM-MR14-MR-04'
+ * @param {string} identifier - employee ID (e.g. '455636') or contractor full name (e.g. 'อรทัย สันธนะวัธนะ')
+ * @param {string} evaluatorType - 'employee' | 'contractor'
+ * @returns {Object|null}
+ */
+function findExistingEvaluation(formType, identifier, evaluatorType = 'employee') {
+    if (!Array.isArray(AppState.evaluations) || AppState.evaluations.length === 0) return null;
+    if (!identifier) return null;
+
+    const formCode = (formType === 'form1' || formType === 'FM-MR12-MR-01') ? 'FM-MR12-MR-01' : 'FM-MR14-MR-04';
+    const cleanId = identifier.toString().trim().toLowerCase();
+
+    return AppState.evaluations.find(item => {
+        if (item.formType !== formCode) return false;
+
+        if (evaluatorType === 'contractor') {
+            const itemEvalName = (item.evaluatorName || '').toLowerCase();
+            const itemFullName = (item.fullName || '').toLowerCase();
+            return itemEvalName.includes(cleanId) || (itemFullName && itemFullName.includes(cleanId));
+        } else {
+            const itemEmpId = (item.employeeId || '').toString().trim().toLowerCase();
+            if (itemEmpId === cleanId) return true;
+            const digits1 = cleanId.replace(/\D/g, '');
+            const digits2 = itemEmpId.replace(/\D/g, '');
+            if (digits1 && digits2 && digits1 === digits2) return true;
+            return false;
+        }
+    }) || null;
+}
+
+function showDuplicateModal(existingEval, attemptedTab) {
+    const modal = document.getElementById('emp-duplicate-modal');
+    if (!modal) {
+        alert(`ท่านได้ทำแบบประเมินนี้แล้วเมื่อวันที่ ${existingEval.date || existingEval.timestamp} (ระบบไม่อนุญาตให้ทำซ้ำ)`);
+        return;
+    }
+
+    const titleEl = document.getElementById('dup-modal-form-title');
+    const nameEl = document.getElementById('dup-modal-emp-name');
+    const dateEl = document.getElementById('dup-modal-date');
+    const btnOther = document.getElementById('btn-dup-switch-other-form');
+
+    const isForm1 = (attemptedTab === 'form1' || existingEval.formType === 'FM-MR12-MR-01');
+    duplicateAttemptOtherForm = isForm1 ? 'form2' : 'form1';
+
+    if (titleEl) {
+        titleEl.textContent = isForm1 ? 'Food Safety Culture' : 'การสื่อสารและประชาสัมพันธ์';
+    }
+    if (nameEl) {
+        nameEl.textContent = existingEval.evaluatorName || existingEval.employeeId || '-';
+    }
+    if (dateEl) {
+        dateEl.textContent = existingEval.date || (existingEval.timestamp ? existingEval.timestamp.split('T')[0] : '-');
+    }
+    if (btnOther) {
+        btnOther.innerHTML = isForm1 ? '<span>📢 ทำแบบประเมินการสื่อสารฯ</span>' : '<span>🥗 ทำแบบประเมิน Food Safety</span>';
+    }
+
+    // Hide other open modals
+    const modalEmpId = document.getElementById('emp-id-modal');
+    if (modalEmpId) modalEmpId.classList.add('hidden');
+    const modalNewEmp = document.getElementById('new-emp-modal');
+    if (modalNewEmp) modalNewEmp.classList.add('hidden');
+    const modalNotFound = document.getElementById('emp-not-found-modal');
+    if (modalNotFound) modalNotFound.classList.add('hidden');
+
+    modal.classList.remove('hidden');
+}
+
+function closeDuplicateModal() {
+    const modal = document.getElementById('emp-duplicate-modal');
+    if (modal) modal.classList.add('hidden');
+}
+
+function handleDuplicateGoOtherForm() {
+    closeDuplicateModal();
+    if (duplicateAttemptOtherForm) {
+        openEmpIdModal(duplicateAttemptOtherForm);
+    }
+}
+
 // Open "Employee Not Found" Alert Modal
 function openEmpNotFoundModal() {
     const modal = document.getElementById('emp-not-found-modal');
@@ -639,6 +727,13 @@ function handleNewEmployeeSubmit(e) {
 
     const targetTab = AppState.pendingEvaluationTab || 'form1';
 
+    // Validation: Check for duplicate evaluation (ไม่ให้ทำซ้ำ)
+    const existing = findExistingEvaluation(targetTab, isContractor ? nameVal : idVal, isContractor ? 'contractor' : 'employee');
+    if (existing) {
+        showDuplicateModal(existing, targetTab);
+        return;
+    }
+
     if (targetTab === 'form1') {
         const f1Name = document.getElementById('f1-name');
         if (f1Name) f1Name.value = idVal;
@@ -681,6 +776,13 @@ function confirmEmployeeId(e) {
             return;
         }
 
+        // Validation 3: Check for duplicate evaluation (ไม่ให้ทำซ้ำ)
+        const existing = findExistingEvaluation(targetTab, val, 'employee');
+        if (existing) {
+            showDuplicateModal(existing, targetTab);
+            return;
+        }
+
         if (errorEl) errorEl.classList.add('hidden');
         AppState.currentEmployeeId = val;
 
@@ -715,6 +817,13 @@ function confirmEmployeeId(e) {
                 errorEl.classList.remove('hidden');
             }
             if (selSup) selSup.focus();
+            return;
+        }
+
+        // Validation: Check for duplicate evaluation (ไม่ให้ทำซ้ำ)
+        const existing = findExistingEvaluation(targetTab, fullName, 'contractor');
+        if (existing) {
+            showDuplicateModal(existing, targetTab);
             return;
         }
 
@@ -1150,6 +1259,7 @@ function handleForm1Submit(e) {
     }
 
     const isContractorSubmit = AppState.evaluatorType === 'contractor' || empName === 'ผู้รับเหมา';
+    const empFullName = document.getElementById('f1-fullname') ? document.getElementById('f1-fullname').value.trim() : '';
 
     if (!isContractorSubmit) {
         if (!empName) {
@@ -1163,6 +1273,14 @@ function handleForm1Submit(e) {
             openEmpNotFoundModal();
             return;
         }
+    }
+
+    // Duplicate Check: Prevent duplicate submission for Form 1 (ไม่ให้ทำซ้ำ)
+    const idToCheck = isContractorSubmit ? (empFullName || 'ผู้รับเหมา') : empName;
+    const existingEval1 = findExistingEvaluation('form1', idToCheck, isContractorSubmit ? 'contractor' : 'employee');
+    if (existingEval1) {
+        showDuplicateModal(existingEval1, 'form1');
+        return;
     }
 
     // Check all questions answered
@@ -1409,6 +1527,7 @@ function handleForm2Submit(e) {
     }
 
     const isContractorSubmit = AppState.evaluatorType === 'contractor' || empName === 'ผู้รับเหมา';
+    const empFullName = document.getElementById('f2-fullname') ? document.getElementById('f2-fullname').value.trim() : '';
 
     if (!isContractorSubmit) {
         if (!empName) {
@@ -1422,6 +1541,14 @@ function handleForm2Submit(e) {
             openEmpNotFoundModal();
             return;
         }
+    }
+
+    // Duplicate Check: Prevent duplicate submission for Form 2 (ไม่ให้ทำซ้ำ)
+    const idToCheck = isContractorSubmit ? (empFullName || 'ผู้รับเหมา') : empName;
+    const existingEval2 = findExistingEvaluation('form2', idToCheck, isContractorSubmit ? 'contractor' : 'employee');
+    if (existingEval2) {
+        showDuplicateModal(existingEval2, 'form2');
+        return;
     }
 
     // Check all questions answered
@@ -2628,13 +2755,15 @@ function closeDetailModal() {
 }
 
 // Delete single evaluation
-function deleteEvaluation(id) {
+async function deleteEvaluation(id) {
     if (!AppState.isAdminUnlocked) {
         alert("🔒 ส่วนนี้สงวนสิทธิ์เฉพาะผู้ดูแลระบบ: กรุณาปลดล็อกรหัสผ่านแอดมินก่อนลบข้อมูล");
         scrollToAdminLock();
         return;
     }
     if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลชุดนี้?")) return;
+
+    // 1. Remove from local AppState and LocalStorage
     AppState.evaluations = AppState.evaluations.filter(x => x.id !== id);
     saveEvaluations();
     updateDashboardMetrics();
@@ -2644,16 +2773,32 @@ function deleteEvaluation(id) {
         renderSuggestionsList();
     }
     updateCounterBadges();
+
+    // 2. Delete from Cloud Firestore (Permanent)
+    if (typeof deleteEvaluationFromCloud === 'function') {
+        try {
+            await deleteEvaluationFromCloud(id);
+        } catch (e) {
+            console.warn("Cloud deletion error:", e);
+        }
+    }
+
+    // 3. Delete from Local Server API fallback
+    try {
+        await fetch(`/api/evaluations/${id}`, { method: 'DELETE' });
+    } catch (e) {}
 }
 
 // Reset / Clear All Data
-function clearAllEvaluations() {
+async function clearAllEvaluations() {
     if (!AppState.isAdminUnlocked) {
         alert("🔒 ส่วนนี้สงวนสิทธิ์เฉพาะผู้ดูแลระบบ: กรุณาปลดล็อกรหัสผ่านแอดมินก่อนล้างข้อมูล");
         scrollToAdminLock();
         return;
     }
-    if (!confirm("คำเตือน: คุณต้องการลบข้อมูลการประเมินทั้งหมดใช่หรือไม่?")) return;
+    if (!confirm("⚠️ คำเตือน: คุณต้องการลบข้อมูลการประเมินทั้งหมดอย่างถาวรใช่หรือไม่? ข้อมูลในระบบและบนคลาวด์จะถูกลบทั้งหมด")) return;
+
+    // 1. Clear local AppState and LocalStorage
     AppState.evaluations = [];
     saveEvaluations();
     updateDashboardMetrics();
@@ -2663,7 +2808,22 @@ function clearAllEvaluations() {
         renderSuggestionsList();
     }
     updateCounterBadges();
-    alert("ล้างข้อมูลเรียบร้อยแล้ว");
+
+    // 2. Clear from Cloud Firestore (Permanent)
+    if (typeof clearAllEvaluationsFromCloud === 'function') {
+        try {
+            await clearAllEvaluationsFromCloud();
+        } catch (e) {
+            console.warn("Cloud clear all error:", e);
+        }
+    }
+
+    // 3. Clear from Local Server API fallback
+    try {
+        await fetch('/api/evaluations', { method: 'DELETE' });
+    } catch (e) {}
+
+    alert("ล้างข้อมูลการประเมินทั้งหมดเรียบร้อยแล้ว");
 }
 
 // Update Header Counter Badges
