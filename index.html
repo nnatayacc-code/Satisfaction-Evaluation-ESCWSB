@@ -937,6 +937,59 @@
         </div>
     </div>
 
+    <!-- Modal: Duplicate Evaluation Alert (ไม่ให้ทำซ้ำ) -->
+    <div id="emp-duplicate-modal" class="hidden fixed inset-0 z-[70] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-amber-100 animate-in fade-in zoom-in-95 duration-150">
+            <div class="w-16 h-16 bg-amber-100 text-amber-700 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 shadow-xs">
+                📋
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-1">ท่านได้ทำแบบประเมินนี้แล้ว</h3>
+            <p class="text-xs text-amber-800 font-semibold mb-3 bg-amber-50 py-1 px-3 rounded-full inline-block border border-amber-200">
+                ⚠️ ระบบไม่อนุญาตให้ทำแบบประเมินซ้ำ
+            </p>
+
+            <div class="bg-slate-50 rounded-2xl p-3.5 border border-slate-200 text-left text-xs space-y-2 mb-5">
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500">แบบประเมิน:</span>
+                    <span id="dup-modal-form-title" class="font-bold text-slate-800 truncate max-w-[170px]">Food Safety Culture</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500">ผู้ประเมิน:</span>
+                    <span id="dup-modal-emp-name" class="font-bold text-slate-800"></span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500">วันที่ประเมินแล้ว:</span>
+                    <span id="dup-modal-date" class="font-mono text-emerald-700 font-bold"></span>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <button 
+                    type="button" 
+                    id="btn-dup-switch-other-form"
+                    onclick="handleDuplicateGoOtherForm()"
+                    class="w-full py-2.5 px-4 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm rounded-xl transition shadow-md cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                    <span>📝 ไปทำอีกแบบประเมินหนึ่ง</span>
+                </button>
+                <button 
+                    type="button" 
+                    onclick="closeDuplicateModal(); switchTab('dashboard');" 
+                    class="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs sm:text-sm rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                    <span>📊 ดูแดชบอร์ดสรุปผล</span>
+                </button>
+                <button 
+                    type="button" 
+                    onclick="closeDuplicateModal()" 
+                    class="w-full py-2 text-xs text-slate-400 hover:text-slate-600 font-medium transition cursor-pointer"
+                >
+                    ปิดหน้าต่าง
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal: Employee Not Found Alert -->
     <div id="emp-not-found-modal" class="hidden fixed inset-0 z-[70] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-rose-100 animate-in fade-in zoom-in-95 duration-150">
@@ -1358,9 +1411,9 @@
     <!-- Firebase App & Firestore Compat SDKs (v10) -->
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-config.js?v=2.3"></script>
-    <script src="js/employees.js?v=2.3"></script>
-    <script src="js/data.js?v=2.3"></script>
-    <script src="js/app.js?v=2.3"></script>
+    <script src="js/firebase-config.js?v=2.4"></script>
+    <script src="js/employees.js?v=2.4"></script>
+    <script src="js/data.js?v=2.4"></script>
+    <script src="js/app.js?v=2.4"></script>
 </body>
 </html>
