@@ -198,16 +198,27 @@
                 <form id="form1-element">
                     <!-- Evaluator Info -->
                     <div class="mb-8 bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
-                        <div class="flex items-center justify-between pb-2 border-b border-slate-200/80">
-                            <span class="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
-                                <span>👤</span> ข้อมูลผู้ทำแบบประเมิน (กรอกรหัสพนักงาน ข้อมูลอื่นๆ จะขึ้นโดยอัตโนมัติ)
-                            </span>
-                            <span id="f1-emp-status" class="text-xs font-medium text-slate-500">พร้อมใช้งาน</span>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-200/80 gap-2">
+                            <div>
+                                <span id="f1-header-title" class="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
+                                    <span>👤</span> ข้อมูลผู้ทำแบบประเมิน (กรอกรหัสพนักงาน ข้อมูลอื่นๆ จะขึ้นโดยอัตโนมัติ)
+                                </span>
+                                <div id="f1-emp-status" class="text-xs font-medium text-slate-500 mt-0.5">พร้อมใช้งาน</div>
+                            </div>
+                            <!-- Evaluator Switcher on Form 1 -->
+                            <div class="inline-flex p-1 bg-slate-200/70 rounded-xl self-start sm:self-auto">
+                                <button type="button" id="f1-btn-type-emp" onclick="switchFormEvaluatorType(1, 'employee')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition bg-white text-emerald-800 shadow-xs cursor-pointer">
+                                    👔 พนักงานบริษัท
+                                </button>
+                                <button type="button" id="f1-btn-type-sup" onclick="switchFormEvaluatorType(1, 'contractor')" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 transition cursor-pointer">
+                                    👷 ผู้รับเหมา
+                                </button>
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             <!-- Employee ID -->
-                            <div>
+                            <div id="f1-id-container">
                                 <label class="block text-xs font-bold text-slate-700 mb-1">
                                     รหัสพนักงาน (Employee ID) <span class="text-rose-500">*</span>
                                 </label>
@@ -226,8 +237,8 @@
                             </div>
 
                             <!-- Full Name (Auto-filled) -->
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">ชื่อ - สกุล (ดึงอัตโนมัติ)</label>
+                            <div id="f1-fullname-container">
+                                <label id="f1-fullname-label" class="block text-xs font-bold text-slate-700 mb-1">ชื่อ - สกุล (ดึงอัตโนมัติ)</label>
                                 <input 
                                     type="text" 
                                     id="f1-fullname" 
@@ -347,17 +358,28 @@
                 <form id="form2-element">
                     <!-- Evaluator Header Information -->
                     <div class="mb-8 bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
-                        <div class="flex items-center justify-between pb-2 border-b border-slate-200/80">
-                            <span class="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
-                                <span>👤</span> ข้อมูลผู้ทำแบบประเมิน (กรอกรหัสพนักงาน ข้อมูลอื่นๆ จะขึ้นโดยอัตโนมัติ)
-                            </span>
-                            <span id="f2-emp-status" class="text-xs font-medium text-slate-500">พร้อมใช้งาน</span>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-200/80 gap-2">
+                            <div>
+                                <span id="f2-header-title" class="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
+                                    <span>👤</span> ข้อมูลผู้ทำแบบประเมิน (กรอกรหัสพนักงาน ข้อมูลอื่นๆ จะขึ้นโดยอัตโนมัติ)
+                                </span>
+                                <div id="f2-emp-status" class="text-xs font-medium text-slate-500 mt-0.5">พร้อมใช้งาน</div>
+                            </div>
+                            <!-- Evaluator Switcher on Form 2 -->
+                            <div class="inline-flex p-1 bg-slate-200/70 rounded-xl self-start sm:self-auto">
+                                <button type="button" id="f2-btn-type-emp" onclick="switchFormEvaluatorType(2, 'employee')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition bg-white text-sky-800 shadow-xs cursor-pointer">
+                                    👔 พนักงานบริษัท
+                                </button>
+                                <button type="button" id="f2-btn-type-sup" onclick="switchFormEvaluatorType(2, 'contractor')" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 transition cursor-pointer">
+                                    👷 ผู้รับเหมา
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Top row: ID, Name, Dept, Date -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             <!-- Employee ID -->
-                            <div>
+                            <div id="f2-id-container">
                                 <label class="block text-xs font-bold text-slate-700 mb-1">
                                     รหัสพนักงาน (Employee ID) <span class="text-rose-500">*</span>
                                 </label>
@@ -376,8 +398,8 @@
                             </div>
 
                             <!-- Full Name -->
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">ชื่อ - สกุล (ดึงอัตโนมัติ)</label>
+                            <div id="f2-fullname-container">
+                                <label id="f2-fullname-label" class="block text-xs font-bold text-slate-700 mb-1">ชื่อ - สกุล (ดึงอัตโนมัติ)</label>
                                 <input 
                                     type="text" 
                                     id="f2-fullname" 
@@ -844,22 +866,36 @@
                     <p id="emp-id-hint" class="text-[11px] text-slate-400 mt-1">ตัวอย่างรหัส 6 หลัก เช่น 455636, 589280, 639003</p>
                 </div>
 
-                <!-- Case 2: Contractor (Dropdown from Excel) -->
-                <div id="container-sup-select" class="hidden">
-                    <label for="select-sup-name" class="block text-xs font-bold text-slate-700 mb-1.5">
-                        เลือกรายชื่อผู้รับเหมา <span class="text-rose-500">*</span>
-                    </label>
-                    <div class="relative">
+                <!-- Case 2: Contractor (ผู้รับเหมา: ไม่มีช่องรหัสพนักงาน + ดรอปดาวน์แผนกมีแค่ 2 รายการ) -->
+                <div id="container-sup-select" class="hidden space-y-3">
+                    <div>
+                        <label for="select-sup-dept" class="block text-xs font-bold text-slate-700 mb-1.5">
+                            แผนก (ผู้รับเหมา) <span class="text-rose-500">*</span>
+                        </label>
+                        <select 
+                            id="select-sup-dept"
+                            onchange="onModalSupDeptChange(this.value)"
+                            class="w-full text-sm px-3.5 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition bg-white font-medium"
+                        >
+                            <option value="">-- กรุณาเลือกแผนกผู้รับเหมา --</option>
+                            <option value="ผรม. ทำความสะอาด">ผรม. ทำความสะอาด</option>
+                            <option value="ผรม. ภูมิทัศน์">ผรม. ภูมิทัศน์</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="select-sup-name" class="block text-xs font-bold text-slate-700 mb-1.5">
+                            ชื่อ - สกุล ผู้รับเหมา <span class="text-rose-500">*</span>
+                        </label>
                         <select 
                             id="select-sup-name"
                             onchange="onModalSupSelect(this.value)"
-                            class="w-full text-sm px-3 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition bg-white font-medium"
+                            class="w-full text-sm px-3.5 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition bg-white font-medium"
                         >
                             <option value="">-- กรุณาเลือกรายชื่อผู้รับเหมา --</option>
-                            <!-- Populated dynamically from EMPLOYEE_DATABASE Sup records -->
                         </select>
                     </div>
-                    <p class="text-[11px] text-slate-400 mt-1">รายชื่อจากไฟล์ "รายชื่อพนักกงาน WSBและSupภายใน.xlsx"</p>
+                    <p class="text-[11px] text-slate-400">เลือกแผนกผู้รับเหมาและระบุชื่อเพื่อเข้าสู่แบบประเมิน</p>
                 </div>
 
                 <p id="emp-id-error" class="hidden text-xs text-rose-500 mt-1 flex items-center gap-1 font-medium">
@@ -939,18 +975,43 @@
                     📝
                 </div>
                 <div>
-                    <h3 class="text-base sm:text-lg font-bold text-slate-800">
+                    <h3 id="new-emp-modal-title" class="text-base sm:text-lg font-bold text-slate-800">
                         กรอกข้อมูลพนักงานใหม่
                     </h3>
-                    <p class="text-xs text-slate-500">
+                    <p id="new-emp-modal-subtitle" class="text-xs text-slate-500">
                         สำหรับพนักงานเข้าใหม่ที่ยังไม่มีข้อมูลในระบบไฟล์
                     </p>
                 </div>
             </div>
 
+            <!-- Evaluator Type Selector for New Entry -->
+            <div class="mb-3.5">
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">ท่านคือ : <span class="text-rose-500">*</span></label>
+                <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+                    <button 
+                        type="button" 
+                        id="new-emp-tab-emp" 
+                        onclick="setNewEvaluatorType('employee')"
+                        class="py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition shadow-xs bg-white text-emerald-800 border border-emerald-200 cursor-pointer"
+                    >
+                        <span>👔</span>
+                        <span>พนักงานบริษัท</span>
+                    </button>
+                    <button 
+                        type="button" 
+                        id="new-emp-tab-sup" 
+                        onclick="setNewEvaluatorType('contractor')"
+                        class="py-2 px-3 rounded-xl font-semibold text-xs flex items-center justify-center gap-1.5 transition text-slate-600 hover:text-slate-900 cursor-pointer"
+                    >
+                        <span>👷</span>
+                        <span>ผู้รับเหมา</span>
+                    </button>
+                </div>
+            </div>
+
             <form id="new-emp-form" onsubmit="handleNewEmployeeSubmit(event)" class="space-y-3.5">
-                <!-- Employee ID -->
-                <div>
+                <!-- Employee ID (Hidden if contractor) -->
+                <div id="new-emp-id-container">
                     <label class="block text-xs font-bold text-slate-700 mb-1">
                         รหัสพนักงาน <span class="text-rose-500">*</span>
                     </label>
@@ -1297,9 +1358,9 @@
     <!-- Firebase App & Firestore Compat SDKs (v10) -->
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-config.js?v=2.1"></script>
-    <script src="js/employees.js?v=2.1"></script>
-    <script src="js/data.js?v=2.1"></script>
-    <script src="js/app.js?v=2.1"></script>
+    <script src="js/firebase-config.js?v=2.3"></script>
+    <script src="js/employees.js?v=2.3"></script>
+    <script src="js/data.js?v=2.3"></script>
+    <script src="js/app.js?v=2.3"></script>
 </body>
 </html>
