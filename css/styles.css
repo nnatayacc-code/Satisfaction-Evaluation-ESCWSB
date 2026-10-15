@@ -1,0 +1,150 @@
+/* 
+ * Stylesheet for Satisfaction Evaluation & Dashboard System
+ * Eastern Sugar and Cane Public Company Limited
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap');
+
+:root {
+    --esc-green: #1b5e20;
+    --esc-green-light: #2e7d32;
+    --esc-gold: #f59e0b;
+    --esc-dark: #0f172a;
+    --esc-slate: #334155;
+    --esc-bg: #f8fafc;
+}
+
+body {
+    font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--esc-bg);
+    color: var(--esc-slate);
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .font-heading {
+    font-family: 'Prompt', 'Sarabun', sans-serif;
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.25s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Nav Link States */
+.nav-link {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-active {
+    background-color: #15803d !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 6px -1px rgba(21, 128, 61, 0.2), 0 2px 4px -2px rgba(21, 128, 61, 0.1);
+}
+
+/* Rating Choice styling */
+.rating-choice {
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.15s ease;
+}
+
+.rating-choice:active {
+    transform: scale(0.96);
+}
+
+/* Sticky live score badge */
+.sticky-score-pill {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Print Stylesheet */
+@media print {
+    /* Hide navigation, buttons, filters, modals when printing */
+    nav, 
+    header, 
+    footer, 
+    .no-print, 
+    button, 
+    #filter-container, 
+    .sticky-score-pill, 
+    #success-modal,
+    #detail-modal,
+    #change-pass-modal,
+    #admin-login-modal {
+        display: none !important;
+    }
+
+    body {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        font-size: 11pt !important;
+    }
+
+    .print-only {
+        display: block !important;
+    }
+
+    /* Expand containers to full width */
+    .max-w-7xl, .max-w-6xl, .max-w-5xl, .max-w-4xl {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl {
+        box-shadow: none !important;
+    }
+
+    .border {
+        border-color: #cccccc !important;
+    }
+
+    /* Force background colors to print */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Page breaks */
+    .page-break {
+        page-break-before: always;
+    }
+
+    /* Print header */
+    .print-header {
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 2px solid #166534;
+        padding-bottom: 12px;
+        margin-bottom: 20px;
+    }
+}
