@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เอกสารประชาสัมพันธ์และคิวอาร์โค้ดแบบประเมิน - บริษัท น้ำตาลและอ้อยตะวันออก จำกัด (มหาชน)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Sarabun', sans-serif;
+        }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: white !important;
+                padding: 0 !important;
+            }
+            .print-card {
+                box-shadow: none !important;
+                border: 2px solid #059669 !important;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen py-8 px-4 antialiased">
+
+    <!-- Top Action Bar (Screen only) -->
+    <div class="no-print max-w-5xl mx-auto mb-6 flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+        <div class="flex items-center gap-3">
+            <a href="index.html" class="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:text-emerald-700 bg-slate-50 hover:bg-emerald-50 rounded-xl border border-slate-200 transition flex items-center gap-1.5">
+                ← กลับสู่หน้าหลักระบบ
+            </a>
+            <span class="text-xs text-slate-400">|</span>
+            <span class="text-xs font-bold text-slate-700">สื่อประชาสัมพันธ์สำหรับส่งพนักงาน</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <!-- Mode Toggle -->
+            <div class="bg-slate-100 p-1 rounded-xl flex items-center text-xs">
+                <button id="btn-mode-cloud" onclick="setMode('cloud')" class="px-3 py-1.5 rounded-lg font-bold bg-white text-emerald-800 shadow-xs transition">
+                    ☁️ ออนไลน์ (Cloudflare)
+                </button>
+                <button id="btn-mode-lan" onclick="setMode('lan')" class="px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition">
+                    🏢 ในบริษัท (Wi-Fi/LAN)
+                </button>
+            </div>
+
+            <!-- Print Button -->
+            <button onclick="window.print()" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer">
+                🖨️ พิมพ์โปสเตอร์ A4
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Poster Container -->
+    <div class="max-w-5xl mx-auto bg-white rounded-3xl p-6 sm:p-10 shadow-lg border border-slate-200 print-card">
+        
+        <!-- Header -->
+        <div class="text-center border-b-2 border-dashed border-slate-200 pb-6 mb-8">
+            <div class="flex justify-center mb-3">
+                <img src="assets/logo_f1.png" alt="Eastern Sugar Logo" class="h-14 sm:h-16 w-auto object-contain">
+            </div>
+            <h1 class="text-xl sm:text-2xl font-extrabold text-emerald-900 mb-1">
+                บริษัท น้ำตาลและอ้อยตะวันออก จำกัด (มหาชน)
+            </h1>
+            <p class="text-sm font-semibold text-slate-600">
+                ขอเชิญชวนพนักงานและผู้รับเหมาทุกท่านร่วมตอบแบบประเมินออนไลน์ ประจำปี 2568
+            </p>
+            <div class="inline-flex items-center gap-2 mt-3 px-3.5 py-1 bg-emerald-50 border border-emerald-200 rounded-full text-xs font-bold text-emerald-800">
+                <span>📱 สแกนผ่านกล้องมือถือได้ทันที ไม่ต้องลงแอปพลิเคชัน</span>
+            </div>
+        </div>
+
+        <!-- Current Active Connection Alert -->
+        <div class="no-print mb-8 p-4 bg-emerald-50/70 border border-emerald-200 rounded-2xl flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">💡</span>
+                <div class="text-xs">
+                    <span class="font-bold text-emerald-900">รูปแบบที่เลือกใช้งาน: </span>
+                    <span id="active-mode-label" class="text-emerald-700 font-semibold">ออนไลน์ (Cloudflare Tunnel) - พนักงานใช้เน็ตมือถือ 4G/5G จากที่ไหนก็ได้</span>
+                </div>
+            </div>
+            <span class="text-[11px] font-mono bg-white px-2.5 py-1 rounded-lg border border-emerald-200 text-emerald-800 font-semibold" id="active-host-badge">
+                trycloudflare.com
+            </span>
+        </div>
+
+        <!-- 3 QR Code Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            
+            <!-- Card 1: Portal (Main Recommendation) -->
+            <div class="bg-gradient-to-b from-emerald-50/50 to-white rounded-2xl border-2 border-emerald-500/40 p-5 flex flex-col items-center text-center shadow-xs relative">
+                <div class="absolute -top-3 bg-emerald-700 text-white text-[11px] font-bold px-3 py-0.5 rounded-full shadow-xs">
+                    ⭐ แนะนำ (รวม 2 ฟอร์ม)
+                </div>
+                <div class="text-3xl my-2">🌐</div>
+                <h2 class="text-base font-bold text-slate-800 mb-1">หน้าหลักรวมแบบประเมิน</h2>
+                <p class="text-xs text-slate-500 mb-3 min-h-[32px]">
+                    เปิดให้พนักงานเลือกทำได้ทั้ง Food Safety และ การสื่อสารฯ
+                </p>
+                <div class="p-2.5 bg-white rounded-xl border border-slate-200 shadow-2xs mb-3">
+                    <img id="img-qr-portal" src="assets/qrcode_portal.png" alt="QR Code หน้าหลัก" class="w-44 h-44 object-contain rounded-lg">
+                </div>
+                <div class="w-full text-left bg-slate-50 p-2.5 rounded-xl border border-slate-200 mb-3">
+                    <div class="text-[10px] text-slate-400 font-bold mb-0.5">ลิงก์เข้าใช้งาน:</div>
+                    <div id="url-portal" class="text-xs font-mono text-emerald-800 break-all select-all font-semibold">
+                        https://nnatayacc-code.github.io/Satisfaction-Evaluation-ESCWSB/
+                    </div>
+                </div>
+                <button onclick="copyLink('url-portal', this)" class="no-print w-full py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span>📋</span> <span>คัดลอกลิงก์</span>
+                </button>
+            </div>
+
+            <!-- Card 2: Food Safety Culture -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col items-center text-center shadow-xs relative">
+                <div class="absolute -top-3 bg-slate-700 text-white text-[11px] font-bold px-3 py-0.5 rounded-full shadow-xs">
+                    FM-MR12-MR-01
+                </div>
+                <div class="text-3xl my-2">🥗</div>
+                <h2 class="text-base font-bold text-slate-800 mb-1">วัฒนธรรมความปลอดภัยอาหาร</h2>
+                <p class="text-xs text-slate-500 mb-3 min-h-[32px]">
+                    Food Safety Culture ประเมินตนเอง 20 ข้อคำถาม
+                </p>
+                <div class="p-2.5 bg-white rounded-xl border border-slate-200 shadow-2xs mb-3">
+                    <img id="img-qr-f1" src="assets/qrcode_food_safety.png" alt="QR Code Food Safety" class="w-44 h-44 object-contain rounded-lg">
+                </div>
+                <div class="w-full text-left bg-slate-50 p-2.5 rounded-xl border border-slate-200 mb-3">
+                    <div class="text-[10px] text-slate-400 font-bold mb-0.5">ลิงก์เข้าใช้งาน:</div>
+                    <div id="url-f1" class="text-xs font-mono text-emerald-800 break-all select-all font-semibold">
+                        https://nnatayacc-code.github.io/Satisfaction-Evaluation-ESCWSB/?form=form1
+                    </div>
+                </div>
+                <button onclick="copyLink('url-f1', this)" class="no-print w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span>📋</span> <span>คัดลอกลิงก์</span>
+                </button>
+            </div>
+
+            <!-- Card 3: Communication & PR -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col items-center text-center shadow-xs relative">
+                <div class="absolute -top-3 bg-slate-700 text-white text-[11px] font-bold px-3 py-0.5 rounded-full shadow-xs">
+                    FM-MR14-MR-04
+                </div>
+                <div class="text-3xl my-2">📢</div>
+                <h2 class="text-base font-bold text-slate-800 mb-1">การสื่อสารและประชาสัมพันธ์</h2>
+                <p class="text-xs text-slate-500 mb-3 min-h-[32px]">
+                    Communication & PR ประเมิน 12 ข้อคำถาม
+                </p>
+                <div class="p-2.5 bg-white rounded-xl border border-slate-200 shadow-2xs mb-3">
+                    <img id="img-qr-f2" src="assets/qrcode_communication.png" alt="QR Code การสื่อสาร" class="w-44 h-44 object-contain rounded-lg">
+                </div>
+                <div class="w-full text-left bg-slate-50 p-2.5 rounded-xl border border-slate-200 mb-3">
+                    <div class="text-[10px] text-slate-400 font-bold mb-0.5">ลิงก์เข้าใช้งาน:</div>
+                    <div id="url-f2" class="text-xs font-mono text-emerald-800 break-all select-all font-semibold">
+                        https://nnatayacc-code.github.io/Satisfaction-Evaluation-ESCWSB/?form=form2
+                    </div>
+                </div>
+                <button onclick="copyLink('url-f2', this)" class="no-print w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span>📋</span> <span>คัดลอกลิงก์</span>
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Instructions Guide -->
+        <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200 text-xs text-slate-600 leading-relaxed">
+            <h4 class="font-bold text-slate-800 text-sm mb-2 flex items-center gap-1.5">
+                <span>📝</span> คำแนะนำในการทำแบบประเมินสำหรับพนักงาน:
+            </h4>
+            <ol class="list-decimal list-inside space-y-1.5 pl-1">
+                <li>เปิดแอปพลิเคชัน <strong>กล้องถ่ายรูปบนสมาร์ตโฟน</strong> หรือแอป LINE สแกนคิวอาร์โค้ดด้านบน</li>
+                <li>กรอก <strong>รหัสพนักงาน</strong> (เช่น 10001) หรือเลือก <strong>ผู้รับเหมา</strong> ระบบจะดึงชื่อ-นามสกุล และฝ่ายให้อัตโนมัติ</li>
+                <li>ตอบข้อคำถามตามระดับความคิดเห็นของท่าน และกด <strong>"ส่งแบบประเมิน"</strong></li>
+                <li>เมื่อเสร็จสิ้นแบบประเมินแรก สามารถกดปุ่ม <strong>"ทำอีกแบบประเมิน"</strong> ได้ทันที</li>
+            </ol>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-6 pt-4 border-t border-slate-200 text-center text-[11px] text-slate-400">
+            ระบบแบบประเมินความพึงพอใจและวัฒนธรรมองค์กร • บริษัท น้ำตาลและอ้อยตะวันออก จำกัด (มหาชน)
+        </div>
+
+    </div>
+
+    <!-- Script to toggle modes and copy links -->
+    <script>
+        let CLOUD_BASE = (window.location && window.location.origin && !window.location.origin.includes('localhost') && !window.location.origin.includes('127.0.0.1'))
+            ? window.location.origin + window.location.pathname.replace(/\/share_qrcode\.html.*$/, '')
+            : 'https://nnatayacc-code.github.io/Satisfaction-Evaluation-ESCWSB';
+
+        const LAN_BASE = 'http://192.168.121.65:8088';
+
+        let currentMode = 'cloud';
+
+        // Check if hosted on cloud or fetch from server tunnel API
+        async function detectHost() {
+            if (window.location && window.location.origin && !window.location.origin.includes('localhost') && !window.location.origin.includes('127.0.0.1')) {
+                CLOUD_BASE = window.location.origin;
+                setMode('cloud');
+                return;
+            }
+            try {
+                const res = await fetch('/api/tunnel');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.tunnelUrl) {
+                        CLOUD_BASE = data.tunnelUrl;
+                        setMode('cloud');
+                    }
+                }
+            } catch(e) {}
+        }
+        detectHost();
+
+        function setMode(mode) {
+            currentMode = mode;
+            const isCloud = (mode === 'cloud');
+
+            // Button styles
+            const btnCloud = document.getElementById('btn-mode-cloud');
+            const btnLan = document.getElementById('btn-mode-lan');
+            if (isCloud) {
+                btnCloud.className = 'px-3 py-1.5 rounded-lg font-bold bg-white text-emerald-800 shadow-xs transition';
+                btnLan.className = 'px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition';
+                document.getElementById('active-mode-label').textContent = 'ออนไลน์ 24 ชม. (Firebase Hosting / Cloud) - พนักงานสแกนจากมือถือได้ทุกที่';
+                const domainName = (new URL(CLOUD_BASE)).hostname;
+                document.getElementById('active-host-badge').textContent = domainName;
+            } else {
+                btnLan.className = 'px-3 py-1.5 rounded-lg font-bold bg-white text-emerald-800 shadow-xs transition';
+                btnCloud.className = 'px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition';
+                document.getElementById('active-mode-label').textContent = 'เครือข่ายภายในบริษัท (Wi-Fi / LAN) - สำหรับเครื่องที่เชื่อมต่อวงเดียวกัน';
+                document.getElementById('active-host-badge').textContent = '192.168.121.65:8088';
+            }
+
+            // URLs & Dynamic QR images
+            const base = isCloud ? CLOUD_BASE : LAN_BASE;
+            const urlPortal = base + (base.endsWith('/') ? '' : '/');
+            const urlF1 = base + (base.endsWith('/') ? '?form=form1' : '/?form=form1');
+            const urlF2 = base + (base.endsWith('/') ? '?form=form2' : '/?form=form2');
+
+            // High resolution dynamic QR code for live cloud links
+            if (isCloud && !base.includes('currency-eden-cars-aging')) {
+                document.getElementById('img-qr-portal').src = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=12&data=${encodeURIComponent(urlPortal)}`;
+                document.getElementById('img-qr-f1').src = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=12&data=${encodeURIComponent(urlF1)}`;
+                document.getElementById('img-qr-f2').src = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=12&data=${encodeURIComponent(urlF2)}`;
+            } else {
+                document.getElementById('img-qr-portal').src = isCloud ? 'assets/qrcode_portal.png' : 'assets/qrcode_portal_lan.png';
+                document.getElementById('img-qr-f1').src = isCloud ? 'assets/qrcode_food_safety.png' : 'assets/qrcode_food_safety_lan.png';
+                document.getElementById('img-qr-f2').src = isCloud ? 'assets/qrcode_communication.png' : 'assets/qrcode_communication_lan.png';
+            }
+
+            document.getElementById('url-portal').textContent = urlPortal;
+            document.getElementById('url-f1').textContent = urlF1;
+            document.getElementById('url-f2').textContent = urlF2;
+        }
+
+        function copyLink(elementId, btn) {
+            const text = document.getElementById(elementId).textContent.trim();
+            navigator.clipboard.writeText(text).then(() => {
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<span>✅</span> <span>คัดลอกแล้ว!</span>';
+                btn.classList.add('bg-emerald-600');
+                setTimeout(() => {
+                    btn.innerHTML = orig;
+                    btn.classList.remove('bg-emerald-600');
+                }, 2000);
+            }).catch(() => {
+                alert('URL: ' + text);
+            });
+        }
+    </script>
+</body>
+</html>
