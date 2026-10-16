@@ -1320,7 +1320,6 @@ function handleForm1Submit(e) {
         environment: (answers[17] + answers[18] + answers[19] + answers[20]) / 4
     };
 
-    const empFullName = document.getElementById('f1-fullname') ? document.getElementById('f1-fullname').value.trim() : '';
     const empExtraDiv = document.getElementById('f1-extra-division') ? document.getElementById('f1-extra-division').textContent : '';
 
     // Determine evaluator type
@@ -1584,8 +1583,6 @@ function handleForm2Submit(e) {
 
     const percent = parseFloat(((totalScore / 48) * 100).toFixed(2));
     const level = getCommunicationLevel(percent);
-
-    const empFullName = document.getElementById('f2-fullname') ? document.getElementById('f2-fullname').value.trim() : '';
 
     // Determine evaluator type
     let isContractor = false;
@@ -3323,15 +3320,15 @@ function getEvaluationUrl(targetKey) {
 
     // If currently accessed via GitHub Pages or any live domain, prioritize current live URL
     if (window.location && window.location.origin && window.location.origin.startsWith('http') && !window.location.origin.includes('localhost') && !window.location.origin.includes('127.0.0.1')) {
-        let base = window.location.origin + window.location.pathname;
-        if (!base.endsWith('/') && !base.endsWith('.html')) base += '/';
-        return target.path ? `${base}${target.path}` : base;
+        let liveBase = window.location.origin + window.location.pathname;
+        if (!liveBase.endsWith('/') && !liveBase.endsWith('.html')) liveBase += '/';
+        return target.path ? `${liveBase}${target.path}` : liveBase;
     }
 
     if (QR_CONFIG.hostMode === 'cloud' && QR_CONFIG.cloudHost) {
-        let base = QR_CONFIG.cloudHost;
-        if (!base.endsWith('/')) base += '/';
-        return target.path ? `${base}${target.path}` : base;
+        let cloudBase = QR_CONFIG.cloudHost;
+        if (!cloudBase.endsWith('/')) cloudBase += '/';
+        return target.path ? `${cloudBase}${target.path}` : cloudBase;
     }
 
     const protocol = (window.location && window.location.protocol && window.location.protocol.startsWith('http')) 
@@ -3350,8 +3347,8 @@ function getEvaluationUrl(targetKey) {
         pathname += '/';
     }
 
-    const base = `${protocol}//${host}${pathname}`;
-    return target.path ? `${base}${target.path}` : base;
+    const lanBase = `${protocol}//${host}${pathname}`;
+    return target.path ? `${lanBase}${target.path}` : lanBase;
 }
 
 function openQRModal(target = 'portal') {
