@@ -3288,7 +3288,7 @@ function refreshDashboard() {
 const QR_CONFIG = {
     currentTarget: 'portal',
     hostMode: 'cloud', // 'cloud' | 'lan' | 'current'
-    cloudHost: 'https://currency-eden-cars-aging.trycloudflare.com',
+    cloudHost: 'https://nnatayacc-code.github.io/Satisfaction-Evaluation-ESCWSB/',
     lanHost: '192.168.121.65:8088',
     targets: {
         portal: {
@@ -3320,6 +3320,13 @@ const QR_CONFIG = {
 
 function getEvaluationUrl(targetKey) {
     const target = QR_CONFIG.targets[targetKey] || QR_CONFIG.targets.portal;
+
+    // If currently accessed via GitHub Pages or any live domain, prioritize current live URL
+    if (window.location && window.location.origin && window.location.origin.startsWith('http') && !window.location.origin.includes('localhost') && !window.location.origin.includes('127.0.0.1')) {
+        let base = window.location.origin + window.location.pathname;
+        if (!base.endsWith('/') && !base.endsWith('.html')) base += '/';
+        return target.path ? `${base}${target.path}` : base;
+    }
 
     if (QR_CONFIG.hostMode === 'cloud' && QR_CONFIG.cloudHost) {
         let base = QR_CONFIG.cloudHost;
