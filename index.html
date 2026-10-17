@@ -556,13 +556,97 @@
                     </div>
                 </div>
 
+                <!-- Evaluation Switcher Buttons (2 Evaluations Only) -->
+                <div class="mb-5 pt-1">
+                    <div class="flex items-center justify-between mb-2.5">
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                            <span>📌</span> เลือกดูผลการประเมิน (เลือกได้ 2 รายการ) :
+                        </label>
+                        <span class="text-[11px] text-slate-500 font-medium hidden sm:inline">
+                            คลิกปุ่มเพื่อสลับแดชบอร์ดของแต่ละแบบประเมิน
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- Button 1: FM-MR12-MR-01 (Food Safety Culture) -->
+                        <button 
+                            type="button" 
+                            id="btn-eval-fsc" 
+                            onclick="selectDashboardEvaluation('FM-MR12-MR-01')" 
+                            class="relative text-left p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between shadow-xs bg-emerald-50/90 border-emerald-600 text-emerald-950 ring-2 ring-emerald-500/20"
+                        >
+                            <div class="flex items-center gap-3.5">
+                                <div id="btn-eval-fsc-icon" class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-emerald-600 text-white shadow-xs">
+                                    🛡️
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="font-mono text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800">
+                                            FM-MR12-MR-01
+                                        </span>
+                                        <span id="badge-eval-fsc-count" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/90 text-emerald-800 border border-emerald-200">
+                                            0 ชุด
+                                        </span>
+                                    </div>
+                                    <div class="font-bold text-sm sm:text-base text-slate-800 mt-1">
+                                        วัฒนธรรมความปลอดภัยอาหาร (Food Safety Culture)
+                                    </div>
+                                    <div class="text-xs text-slate-500 mt-0.5">
+                                        20 ข้อคำถาม • 6 มิติหลัก • เต็ม 100 คะแนน
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="btn-eval-fsc-check" class="flex flex-col items-end">
+                                <span class="text-xs font-bold text-emerald-700 flex items-center gap-1 bg-white px-2.5 py-1 rounded-full border border-emerald-300 shadow-2xs">
+                                    <span>กำลังแสดง</span>
+                                    <span>✓</span>
+                                </span>
+                            </div>
+                        </button>
+
+                        <!-- Button 2: FM-MR14-MR-04 (Communication & PR) -->
+                        <button 
+                            type="button" 
+                            id="btn-eval-com" 
+                            onclick="selectDashboardEvaluation('FM-MR14-MR-04')" 
+                            class="relative text-left p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 text-slate-700"
+                        >
+                            <div class="flex items-center gap-3.5">
+                                <div id="btn-eval-com-icon" class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-sky-100 text-sky-700">
+                                    📢
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="font-mono text-[11px] font-bold px-2 py-0.5 rounded-md bg-sky-100 text-sky-800">
+                                            FM-MR14-MR-04
+                                        </span>
+                                        <span id="badge-eval-com-count" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                                            0 ชุด
+                                        </span>
+                                    </div>
+                                    <div class="font-bold text-sm sm:text-base text-slate-800 mt-1">
+                                        แบบประเมินการสื่อสารและประชาสัมพันธ์
+                                    </div>
+                                    <div class="text-xs text-slate-500 mt-0.5">
+                                        12 ข้อคำถาม • ประสิทธิผลการสื่อสาร • เต็ม 48 คะแนน
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="btn-eval-com-check" class="hidden flex-col items-end">
+                                <span class="text-xs font-bold text-sky-700 flex items-center gap-1 bg-white px-2.5 py-1 rounded-full border border-sky-300 shadow-2xs">
+                                    <span>กำลังแสดง</span>
+                                    <span>✓</span>
+                                </span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Filter Controls -->
-                <div id="filter-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 pt-1">
+                <div id="filter-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 pt-3 border-t border-slate-100">
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-600 mb-1">เลือกแบบประเมิน:</label>
-                        <select id="filter-form-type" class="w-full text-xs px-2.5 py-2 border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:ring-1 focus:ring-emerald-500">
-                            <option value="ALL">แบบประเมินทั้งหมด</option>
-                            <option value="FM-MR12-MR-01">FM-MR12-MR-01 (ความปลอดภัยอาหาร)</option>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">เลือกแบบประเมิน (2 รายการ):</label>
+                        <select id="filter-form-type" class="w-full text-xs px-2.5 py-2 border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:ring-1 focus:ring-emerald-500 font-semibold text-slate-800">
+                            <option value="FM-MR12-MR-01" selected>FM-MR12-MR-01 (ความปลอดภัยอาหาร)</option>
                             <option value="FM-MR14-MR-04">FM-MR14-MR-04 (การสื่อสารฯ)</option>
                         </select>
                     </div>
@@ -600,7 +684,7 @@
                 <!-- Card 1: Total Respondents -->
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
                     <div>
-                        <span class="text-xs font-semibold text-slate-500 block uppercase tracking-wider">ผู้ทำแบบประเมินทั้งหมด</span>
+                        <span id="metric-card1-title" class="text-xs font-semibold text-slate-500 block uppercase tracking-wider">ผู้ทำแบบประเมิน</span>
                         <div id="metric-total-count" class="text-2xl md:text-3xl font-extrabold text-slate-800 mt-1">0</div>
                         <div id="metric-total-breakdown" class="text-[11px] text-slate-500 mt-1 flex items-center gap-1.5 flex-wrap">
                             <span class="inline-flex items-center gap-0.5">🏢 พนักงาน: <b id="metric-emp-count" class="text-emerald-700">0</b></span>
@@ -608,38 +692,38 @@
                             <span class="inline-flex items-center gap-0.5">👷 ผู้รับเหมา: <b id="metric-sup-count" class="text-amber-700">0</b></span>
                         </div>
                     </div>
-                    <div class="w-12 h-12 bg-emerald-50 text-emerald-700 rounded-xl flex items-center justify-center text-2xl font-bold flex-shrink-0">
+                    <div id="metric-card1-icon" class="w-12 h-12 bg-emerald-50 text-emerald-700 rounded-xl flex items-center justify-center text-2xl font-bold flex-shrink-0">
                         👥
                     </div>
                 </div>
 
-                <!-- Card 2: Food Safety Avg -->
+                <!-- Card 2: Average Score (Food Safety / Communication) -->
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
                     <div>
-                        <span class="text-xs font-semibold text-slate-500 block uppercase tracking-wider">คะแนนเฉลี่ย Food Safety</span>
+                        <span id="metric-score-label" class="text-xs font-semibold text-slate-500 block uppercase tracking-wider">คะแนนเฉลี่ย Food Safety</span>
                         <div id="metric-fs-avg" class="text-2xl md:text-3xl font-extrabold text-emerald-700 mt-1">-</div>
                         <div id="metric-fs-level" class="text-xs text-slate-400 mt-1">ยังไม่มีข้อมูล</div>
                         <div id="metric-fs-breakdown" class="text-[11px] text-slate-500 mt-1">
                             <!-- Populated dynamically -->
                         </div>
                     </div>
-                    <div class="w-12 h-12 bg-emerald-50 text-emerald-700 rounded-xl flex items-center justify-center text-2xl font-bold flex-shrink-0">
+                    <div id="metric-score-icon" class="w-12 h-12 bg-emerald-50 text-emerald-700 rounded-xl flex items-center justify-center text-2xl font-bold flex-shrink-0">
                         🛡️
                     </div>
                 </div>
 
-                <!-- Card 3: Communication Avg -->
+                <!-- Card 3: Percentage Score & Achievement Target -->
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
                     <div>
-                        <span class="text-xs font-semibold text-slate-500 block uppercase tracking-wider">คะแนนเฉลี่ย การสื่อสารฯ</span>
+                        <span id="metric-pct-label" class="text-xs font-semibold text-slate-500 block uppercase tracking-wider">ร้อยละคะแนนเฉลี่ย (%)</span>
                         <div id="metric-com-avg" class="text-2xl md:text-3xl font-extrabold text-sky-700 mt-1">-</div>
-                        <div id="metric-com-level" class="text-xs text-slate-400 mt-1">ยังไม่มีข้อมูล</div>
+                        <div id="metric-com-level" class="text-xs text-slate-400 mt-1">เกณฑ์เป้าหมาย ≥ 80%</div>
                         <div id="metric-com-breakdown" class="text-[11px] text-slate-500 mt-1">
                             <!-- Populated dynamically -->
                         </div>
                     </div>
-                    <div class="w-12 h-12 bg-sky-50 text-sky-700 rounded-xl flex items-center justify-center text-2xl font-bold flex-shrink-0">
-                        📢
+                    <div id="metric-pct-icon" class="w-12 h-12 bg-sky-50 text-sky-700 rounded-xl flex items-center justify-center text-2xl font-bold flex-shrink-0">
+                        🎯
                     </div>
                 </div>
 
@@ -658,8 +742,8 @@
 
             <!-- Charts Section Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Chart 1: Food Safety Radar (6 Dimensions) -->
-                <div class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200 shadow-xs">
+                <!-- Chart 1: Food Safety Radar (6 Dimensions) - Shown when FSC selected -->
+                <div id="container-chart-radar" class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200 shadow-xs">
                     <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
                         <div>
                             <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
@@ -673,8 +757,8 @@
                     </div>
                 </div>
 
-                <!-- Chart 2: Communication Items Bar Chart -->
-                <div class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200 shadow-xs">
+                <!-- Chart 2: Communication Items Bar Chart - Shown when Communication selected -->
+                <div id="container-chart-communication" class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200 shadow-xs hidden">
                     <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
                         <div>
                             <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
@@ -689,13 +773,13 @@
                 </div>
 
                 <!-- Chart 3: Result Distribution Doughnut -->
-                <div class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200 shadow-xs">
+                <div id="container-chart-distribution" class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200 shadow-xs">
                     <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
                         <div>
-                            <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
+                            <h3 id="chart-dist-title" class="font-bold text-base text-slate-800 flex items-center gap-2">
                                 <span>🍩</span> สัดส่วนกลุ่มผู้ประเมิน & ระดับผลการประเมิน
                             </h3>
-                            <p class="text-xs text-slate-500">สัดส่วนผู้เข้าร่วมประเมิน (พนักงาน vs ผู้รับเหมา) และระดับผลลัพธ์</p>
+                            <p id="chart-dist-desc" class="text-xs text-slate-500">สัดส่วนผู้เข้าร่วมประเมินและระดับผลลัพธ์</p>
                         </div>
                     </div>
                     <div class="h-72 md:h-80 relative">
@@ -704,13 +788,13 @@
                 </div>
 
                 <!-- Chart 4: Employee vs Contractor Comparison Bar Chart -->
-                <div class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200 shadow-xs">
+                <div id="container-chart-emp-compare" class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200 shadow-xs">
                     <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
                         <div>
-                            <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
+                            <h3 id="chart-emp-title" class="font-bold text-base text-slate-800 flex items-center gap-2">
                                 <span>⚖️</span> เปรียบเทียบคะแนน พนักงาน WSB vs ผู้รับเหมา Sup
                             </h3>
-                            <p class="text-xs text-slate-500">เปรียบเทียบคะแนนเฉลี่ยร้อยละ (%) ในแต่ละแบบประเมิน</p>
+                            <p id="chart-emp-desc" class="text-xs text-slate-500">เปรียบเทียบคะแนนเฉลี่ยร้อยละ (%) ของแบบประเมินนี้</p>
                         </div>
                     </div>
                     <div class="h-72 md:h-80 relative">
@@ -731,10 +815,10 @@
                     <div class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200 shadow-xs">
                         <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
                             <div>
-                                <h3 class="font-bold text-base text-slate-800 flex items-center gap-2">
+                                <h3 id="chart-dept-title" class="font-bold text-base text-slate-800 flex items-center gap-2">
                                     <span>🏢</span> เปรียบเทียบคะแนนเฉลี่ยแยกตามฝ่าย / แผนก
                                 </h3>
-                                <p class="text-xs text-slate-500">คะแนนเฉลี่ยภาพรวมของแต่ละฝ่าย / แผนก (%)</p>
+                                <p id="chart-dept-desc" class="text-xs text-slate-500">คะแนนเฉลี่ยภาพรวมของแต่ละฝ่าย / แผนก (%)</p>
                             </div>
                         </div>
                         <div class="h-72 md:h-80 relative">
