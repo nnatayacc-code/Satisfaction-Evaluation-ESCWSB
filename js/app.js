@@ -20,7 +20,7 @@ const AppState = {
     },
     isAdminUnlocked: sessionStorage.getItem('admin_insights_unlocked') === 'true',
     filter: {
-        formType: 'ALL',
+        formType: 'FM-MR12-MR-01', // Default to 1st evaluation (2 evaluations only)
         department: 'ALL',
         userType: 'ALL', // 'ALL', 'employee', 'contractor'
         startDate: '',
@@ -49,6 +49,7 @@ function initApp() {
 
     // Production mode: Do not auto-generate demo data, start clean for real evaluations
 
+    updateDashboardEvaluationButtons();
     updateDashboardMetrics();
     renderDashboardCharts();
     updateAdminInsightsVisibility();
@@ -88,6 +89,7 @@ function mergeEvaluationsList(serverList) {
     AppState.evaluations.forEach(item => { if (item.id && !map.has(item.id)) map.set(item.id, item); });
     AppState.evaluations = Array.from(map.values()).sort((a, b) => new Date(b.timestamp || b.date) - new Date(a.timestamp || a.date));
     localStorage.setItem(APP_CONFIG.storageKey, JSON.stringify(AppState.evaluations));
+    updateDashboardEvaluationButtons();
     updateDashboardMetrics();
     renderDashboardCharts();
     updateAdminInsightsVisibility();
@@ -145,6 +147,7 @@ async function fetchServerEvaluations() {
 function saveEvaluations() {
     try {
         localStorage.setItem(APP_CONFIG.storageKey, JSON.stringify(AppState.evaluations));
+        updateDashboardEvaluationButtons();
         updateCounterBadges();
     } catch (e) {
         console.error("Error saving to localStorage:", e);
@@ -1675,11 +1678,76 @@ function closeSuccessModal() {
 // DASHBOARD & ANALYTICS
 // -------------------------------------------------------------------------
 
+// Switch dashboard evaluation view (2 evaluations only)
+function selectDashboardEvaluation(formType) {
+    if (formType !== 'FM-MR12-MR-01' && formType !== 'FM-MR14-MR-04') {
+        formType = 'FM-MR12-MR-01';
+    }
+    AppState.filter.formType = formType;
+
+    // Synchronize select dropdown if present
+    const sel = document.getElementById('filter-form-type');
+    if (sel && sel.value !== formType) {
+        sel.value = formType;
+    }
+
+    updateDashboardEvaluationButtons();
+    refreshDashboard();
+}
+
+// Update UI button highlights and response counts on the 2 evaluation buttons
+function updateDashboardEvaluationButtons() {
+    const isFS = AppState.filter.formType === 'FM-MR12-MR-01';
+
+    const btnFSC = document.getElementById('btn-eval-fsc');
+    const btnCOM = document.getElementById('btn-eval-com');
+    const iconFSC = document.getElementById('btn-eval-fsc-icon');
+    const iconCOM = document.getElementById('btn-eval-com-icon');
+    const checkFSC = document.getElementById('btn-eval-fsc-check');
+    const checkCOM = document.getElementById('btn-eval-com-check');
+
+    const countFSC = document.getElementById('badge-eval-fsc-count');
+    const countCOM = document.getElementById('badge-eval-com-count');
+
+    // Count submissions per evaluation
+    if (Array.isArray(AppState.evaluations)) {
+        const totalFSC = AppState.evaluations.filter(x => x.formType === 'FM-MR12-MR-01').length;
+        const totalCOM = AppState.evaluations.filter(x => x.formType === 'FM-MR14-MR-04').length;
+        if (countFSC) countFSC.textContent = `${totalFSC} ชุด`;
+        if (countCOM) countCOM.textContent = `${totalCOM} ชุด`;
+    }
+
+    // Toggle button active / inactive styles
+    if (btnFSC && btnCOM) {
+        if (isFS) {
+            // Button 1 (FSC) ACTIVE
+            btnFSC.className = 'relative text-left p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between shadow-xs bg-emerald-50/90 border-emerald-600 text-emerald-950 ring-2 ring-emerald-500/20';
+            if (iconFSC) iconFSC.className = 'w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-emerald-600 text-white shadow-xs';
+            if (checkFSC) checkFSC.className = 'flex flex-col items-end';
+
+            // Button 2 (COM) INACTIVE
+            btnCOM.className = 'relative text-left p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 text-slate-700 shadow-none ring-0';
+            if (iconCOM) iconCOM.className = 'w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-sky-100 text-sky-700';
+            if (checkCOM) checkCOM.className = 'hidden flex-col items-end';
+        } else {
+            // Button 2 (COM) ACTIVE
+            btnCOM.className = 'relative text-left p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between shadow-xs bg-sky-50/90 border-sky-600 text-sky-950 ring-2 ring-sky-500/20';
+            if (iconCOM) iconCOM.className = 'w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-sky-600 text-white shadow-xs';
+            if (checkCOM) checkCOM.className = 'flex flex-col items-end';
+
+            // Button 1 (FSC) INACTIVE
+            btnFSC.className = 'relative text-left p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 text-slate-700 shadow-none ring-0';
+            if (iconFSC) iconFSC.className = 'w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-emerald-100 text-emerald-700';
+            if (checkFSC) checkFSC.className = 'hidden flex-col items-end';
+        }
+    }
+}
+
 // Filter helper
 function getFilteredEvaluations() {
     return AppState.evaluations.filter(item => {
         // Form type filter
-        if (AppState.filter.formType !== 'ALL' && item.formType !== AppState.filter.formType) {
+        if (AppState.filter.formType && AppState.filter.formType !== 'ALL' && item.formType !== AppState.filter.formType) {
             return false;
         }
         // User type filter (Employee vs Contractor)
@@ -1712,15 +1780,23 @@ function getFilteredEvaluations() {
 }
 
 function updateDashboardMetrics() {
+    const isFS = AppState.filter.formType === 'FM-MR12-MR-01';
     const filtered = getFilteredEvaluations();
-
-    const fsItems = filtered.filter(x => x.formType === 'FM-MR12-MR-01');
-    const comItems = filtered.filter(x => x.formType === 'FM-MR14-MR-04');
 
     const empItems = filtered.filter(x => !isContractorEvaluation(x));
     const supItems = filtered.filter(x => isContractorEvaluation(x));
 
-    // Total Count & Breakdown
+    // Card 1: Total Count & WSB/Sup Breakdown
+    const card1TitleEl = document.getElementById('metric-card1-title');
+    if (card1TitleEl) {
+        card1TitleEl.textContent = isFS ? 'ผู้ทำแบบประเมิน Food Safety' : 'ผู้ทำแบบประเมิน การสื่อสารฯ';
+    }
+    const card1IconEl = document.getElementById('metric-card1-icon');
+    if (card1IconEl) {
+        card1IconEl.className = isFS 
+            ? 'w-12 h-12 bg-emerald-50 text-emerald-700 rounded-xl flex items-center justify-center text-2xl font-bold flex-shrink-0'
+            : 'w-12 h-12 bg-sky-50 text-sky-700 rounded-xl flex items-center justify-center text-2xl font-bold flex-shrink-0';
+    }
     const totalCountEl = document.getElementById('metric-total-count');
     if (totalCountEl) totalCountEl.textContent = filtered.length;
 
@@ -1730,68 +1806,153 @@ function updateDashboardMetrics() {
     const supCountEl = document.getElementById('metric-sup-count');
     if (supCountEl) supCountEl.textContent = supItems.length;
 
-    // FS Average Score & Breakdown
-    const fsAvgScoreEl = document.getElementById('metric-fs-avg');
-    const fsAvgLevelEl = document.getElementById('metric-fs-level');
-    const fsBreakdownEl = document.getElementById('metric-fs-breakdown');
-    if (fsItems.length > 0) {
-        const sum = fsItems.reduce((acc, c) => acc + c.totalScore, 0);
-        const avg = (sum / fsItems.length).toFixed(1);
-        if (fsAvgScoreEl) fsAvgScoreEl.textContent = `${avg} / 100`;
-        const lvl = getFoodSafetyLevel(parseFloat(avg));
-        if (fsAvgLevelEl) {
-            fsAvgLevelEl.textContent = lvl.level;
-            fsAvgLevelEl.className = `text-xs font-semibold px-2 py-0.5 rounded-full inline-block mt-1 ${lvl.colorClass}`;
+    // Card 2: Average Score (Out of 100 for FSC, out of 48 for Communication)
+    const scoreLabelEl = document.getElementById('metric-score-label');
+    const scoreValEl = document.getElementById('metric-fs-avg');
+    const scoreLevelEl = document.getElementById('metric-fs-level');
+    const scoreBreakdownEl = document.getElementById('metric-fs-breakdown');
+    const scoreIconEl = document.getElementById('metric-score-icon');
+
+    // Card 3: Percentage Score & Achievement Status
+    const pctLabelEl = document.getElementById('metric-pct-label');
+    const pctValEl = document.getElementById('metric-com-avg');
+    const pctLevelEl = document.getElementById('metric-com-level');
+    const pctBreakdownEl = document.getElementById('metric-com-breakdown');
+    const pctIconEl = document.getElementById('metric-pct-icon');
+
+    if (isFS) {
+        // --- FOOD SAFETY CULTURE (FM-MR12-MR-01) ---
+        if (scoreLabelEl) scoreLabelEl.textContent = 'คะแนนเฉลี่ย Food Safety';
+        if (scoreIconEl) {
+            scoreIconEl.className = 'w-12 h-12 bg-emerald-50 text-emerald-700 rounded-xl flex items-center justify-center text-2xl font-bold flex-shrink-0';
+            scoreIconEl.textContent = '🛡️';
+        }
+        if (pctLabelEl) pctLabelEl.textContent = 'ร้อยละคะแนนเฉลี่ย (%)';
+        if (pctIconEl) {
+            pctIconEl.className = 'w-12 h-12 bg-emerald-50 text-emerald-700 rounded-xl flex items-center justify-center text-2xl font-bold flex-shrink-0';
+            pctIconEl.textContent = '📈';
         }
 
-        const fsEmp = fsItems.filter(x => !isContractorEvaluation(x));
-        const fsSup = fsItems.filter(x => isContractorEvaluation(x));
-        const fsEmpAvg = fsEmp.length ? (fsEmp.reduce((a, c) => a + c.totalScore, 0) / fsEmp.length).toFixed(1) : '-';
-        const fsSupAvg = fsSup.length ? (fsSup.reduce((a, c) => a + c.totalScore, 0) / fsSup.length).toFixed(1) : '-';
-        if (fsBreakdownEl) {
-            fsBreakdownEl.innerHTML = `🏢 พนักงาน: <b class="text-emerald-700 font-bold">${fsEmpAvg}</b> | 👷 ผรม.: <b class="text-amber-700 font-bold">${fsSupAvg}</b>`;
+        if (filtered.length > 0) {
+            const sum = filtered.reduce((acc, c) => acc + (c.totalScore || 0), 0);
+            const avg = (sum / filtered.length).toFixed(1);
+            const avgPct = parseFloat(avg).toFixed(1); // 100 max = direct %
+
+            if (scoreValEl) {
+                scoreValEl.textContent = `${avg} / 100`;
+                scoreValEl.className = 'text-2xl md:text-3xl font-extrabold text-emerald-700 mt-1';
+            }
+            const lvl = getFoodSafetyLevel(parseFloat(avg));
+            if (scoreLevelEl) {
+                scoreLevelEl.textContent = lvl.level;
+                scoreLevelEl.className = `text-xs font-semibold px-2 py-0.5 rounded-full inline-block mt-1 ${lvl.colorClass}`;
+            }
+
+            const empAvg = empItems.length ? (empItems.reduce((a, c) => a + c.totalScore, 0) / empItems.length).toFixed(1) : '-';
+            const supAvg = supItems.length ? (supItems.reduce((a, c) => a + c.totalScore, 0) / supItems.length).toFixed(1) : '-';
+            if (scoreBreakdownEl) {
+                scoreBreakdownEl.innerHTML = `🏢 พนักงาน: <b class="text-emerald-700 font-bold">${empAvg}</b> | 👷 ผรม.: <b class="text-amber-700 font-bold">${supAvg}</b>`;
+            }
+
+            // Card 3: % Average and Target
+            if (pctValEl) {
+                pctValEl.textContent = `${avgPct}%`;
+                pctValEl.className = 'text-2xl md:text-3xl font-extrabold text-emerald-700 mt-1';
+            }
+            const isPass = parseFloat(avgPct) >= 80;
+            if (pctLevelEl) {
+                pctLevelEl.textContent = isPass ? 'เกณฑ์เป้าหมาย ≥ 80% (บรรลุเกณฑ์ยอดเยี่ยม ✓)' : 'เกณฑ์เป้าหมาย ≥ 80% (ต้องพัฒนาเพิ่มเติม)';
+                pctLevelEl.className = `text-xs font-semibold px-2 py-0.5 rounded-full inline-block mt-1 ${isPass ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}`;
+            }
+
+            const empPct = empItems.length ? ((empItems.reduce((a, c) => a + c.percentage, 0)) / empItems.length).toFixed(1) + '%' : '-';
+            const supPct = supItems.length ? ((supItems.reduce((a, c) => a + c.percentage, 0)) / supItems.length).toFixed(1) + '%' : '-';
+            if (pctBreakdownEl) {
+                pctBreakdownEl.innerHTML = `🏢 WSB: <b class="text-emerald-700 font-bold">${empPct}</b> | 👷 ผรม.: <b class="text-amber-700 font-bold">${supPct}</b>`;
+            }
+        } else {
+            if (scoreValEl) scoreValEl.textContent = "-";
+            if (scoreLevelEl) {
+                scoreLevelEl.textContent = "ยังไม่มีข้อมูล";
+                scoreLevelEl.className = "text-xs text-slate-400 mt-1";
+            }
+            if (scoreBreakdownEl) scoreBreakdownEl.innerHTML = "";
+            if (pctValEl) pctValEl.textContent = "-";
+            if (pctLevelEl) {
+                pctLevelEl.textContent = "เกณฑ์เป้าหมาย ≥ 80%";
+                pctLevelEl.className = "text-xs text-slate-400 mt-1";
+            }
+            if (pctBreakdownEl) pctBreakdownEl.innerHTML = "";
         }
     } else {
-        if (fsAvgScoreEl) fsAvgScoreEl.textContent = "-";
-        if (fsAvgLevelEl) {
-            fsAvgLevelEl.textContent = "ยังไม่มีข้อมูล";
-            fsAvgLevelEl.className = "text-xs text-slate-400 mt-1";
+        // --- COMMUNICATION & PR (FM-MR14-MR-04) ---
+        if (scoreLabelEl) scoreLabelEl.textContent = 'คะแนนเฉลี่ย การสื่อสารฯ';
+        if (scoreIconEl) {
+            scoreIconEl.className = 'w-12 h-12 bg-sky-50 text-sky-700 rounded-xl flex items-center justify-center text-2xl font-bold flex-shrink-0';
+            scoreIconEl.textContent = '📢';
         }
-        if (fsBreakdownEl) fsBreakdownEl.innerHTML = "";
+        if (pctLabelEl) pctLabelEl.textContent = 'ประสิทธิผลการสื่อสาร (%)';
+        if (pctIconEl) {
+            pctIconEl.className = 'w-12 h-12 bg-sky-50 text-sky-700 rounded-xl flex items-center justify-center text-2xl font-bold flex-shrink-0';
+            pctIconEl.textContent = '🎯';
+        }
+
+        if (filtered.length > 0) {
+            const sumScore = filtered.reduce((acc, c) => acc + (c.totalScore || 0), 0);
+            const avgScore = (sumScore / filtered.length).toFixed(1);
+            const avgPercent = ((avgScore / 48) * 100).toFixed(1);
+
+            if (scoreValEl) {
+                scoreValEl.textContent = `${avgScore} / 48`;
+                scoreValEl.className = 'text-2xl md:text-3xl font-extrabold text-sky-700 mt-1';
+            }
+            const lvl = getCommunicationLevel(parseFloat(avgPercent));
+            if (scoreLevelEl) {
+                scoreLevelEl.textContent = lvl.level;
+                scoreLevelEl.className = `text-xs font-semibold px-2 py-0.5 rounded-full inline-block mt-1 ${lvl.colorClass}`;
+            }
+
+            const comEmp = empItems;
+            const comSup = supItems;
+            const comEmpAvg = comEmp.length ? (comEmp.reduce((a, c) => a + c.totalScore, 0) / comEmp.length).toFixed(1) : '-';
+            const comSupAvg = comSup.length ? (comSup.reduce((a, c) => a + c.totalScore, 0) / comSup.length).toFixed(1) : '-';
+            if (scoreBreakdownEl) {
+                scoreBreakdownEl.innerHTML = `🏢 พนักงาน: <b class="text-sky-700 font-bold">${comEmpAvg}</b> | 👷 ผรม.: <b class="text-amber-700 font-bold">${comSupAvg}</b>`;
+            }
+
+            // Card 3: % Average and Target
+            if (pctValEl) {
+                pctValEl.textContent = `${avgPercent}%`;
+                pctValEl.className = 'text-2xl md:text-3xl font-extrabold text-sky-700 mt-1';
+            }
+            const isPass = parseFloat(avgPercent) >= 80;
+            if (pctLevelEl) {
+                pctLevelEl.textContent = isPass ? 'เกณฑ์เป้าหมาย ≥ 80% (การสื่อสารมีประสิทธิผลสูง ✓)' : 'เกณฑ์เป้าหมาย ≥ 80% (ต้องพัฒนาการสื่อสาร)';
+                pctLevelEl.className = `text-xs font-semibold px-2 py-0.5 rounded-full inline-block mt-1 ${isPass ? 'bg-sky-50 text-sky-700 border border-sky-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}`;
+            }
+
+            const comEmpPct = comEmp.length ? ((comEmp.reduce((a, c) => a + c.totalScore, 0) / (comEmp.length * 48)) * 100).toFixed(1) + '%' : '-';
+            const comSupPct = comSup.length ? ((comSup.reduce((a, c) => a + c.totalScore, 0) / (comSup.length * 48)) * 100).toFixed(1) + '%' : '-';
+            if (pctBreakdownEl) {
+                pctBreakdownEl.innerHTML = `🏢 WSB: <b class="text-sky-700 font-bold">${comEmpPct}</b> | 👷 ผรม.: <b class="text-amber-700 font-bold">${comSupPct}</b>`;
+            }
+        } else {
+            if (scoreValEl) scoreValEl.textContent = "-";
+            if (scoreLevelEl) {
+                scoreLevelEl.textContent = "ยังไม่มีข้อมูล";
+                scoreLevelEl.className = "text-xs text-slate-400 mt-1";
+            }
+            if (scoreBreakdownEl) scoreBreakdownEl.innerHTML = "";
+            if (pctValEl) pctValEl.textContent = "-";
+            if (pctLevelEl) {
+                pctLevelEl.textContent = "เกณฑ์เป้าหมาย ≥ 80%";
+                pctLevelEl.className = "text-xs text-slate-400 mt-1";
+            }
+            if (pctBreakdownEl) pctBreakdownEl.innerHTML = "";
+        }
     }
 
-    // Com Average Score & Breakdown
-    const comAvgScoreEl = document.getElementById('metric-com-avg');
-    const comAvgLevelEl = document.getElementById('metric-com-level');
-    const comBreakdownEl = document.getElementById('metric-com-breakdown');
-    if (comItems.length > 0) {
-        const sumScore = comItems.reduce((acc, c) => acc + c.totalScore, 0);
-        const avgScore = (sumScore / comItems.length).toFixed(1);
-        const avgPercent = ((avgScore / 48) * 100).toFixed(1);
-        if (comAvgScoreEl) comAvgScoreEl.textContent = `${avgScore} / 48 (${avgPercent}%)`;
-        const lvl = getCommunicationLevel(parseFloat(avgPercent));
-        if (comAvgLevelEl) {
-            comAvgLevelEl.textContent = lvl.level;
-            comAvgLevelEl.className = `text-xs font-semibold px-2 py-0.5 rounded-full inline-block mt-1 ${lvl.colorClass}`;
-        }
-
-        const comEmp = comItems.filter(x => !isContractorEvaluation(x));
-        const comSup = comItems.filter(x => isContractorEvaluation(x));
-        const comEmpAvg = comEmp.length ? ((comEmp.reduce((a, c) => a + c.totalScore, 0) / (comEmp.length * 48)) * 100).toFixed(1) + '%' : '-';
-        const comSupAvg = comSup.length ? ((comSup.reduce((a, c) => a + c.totalScore, 0) / (comSup.length * 48)) * 100).toFixed(1) + '%' : '-';
-        if (comBreakdownEl) {
-            comBreakdownEl.innerHTML = `🏢 พนักงาน: <b class="text-emerald-700 font-bold">${comEmpAvg}</b> | 👷 ผรม.: <b class="text-amber-700 font-bold">${comSupAvg}</b>`;
-        }
-    } else {
-        if (comAvgScoreEl) comAvgScoreEl.textContent = "-";
-        if (comAvgLevelEl) {
-            comAvgLevelEl.textContent = "ยังไม่มีข้อมูล";
-            comAvgLevelEl.className = "text-xs text-slate-400 mt-1";
-        }
-        if (comBreakdownEl) comBreakdownEl.innerHTML = "";
-    }
-
-    // Department participation
+    // Card 4: Department participation
     const deptCountEl = document.getElementById('metric-dept-count');
     if (deptCountEl) {
         const uniqueDepts = new Set(filtered.map(x => x.department));
@@ -1806,12 +1967,24 @@ function renderDashboardCharts() {
         return;
     }
 
+    const isFS = AppState.filter.formType === 'FM-MR12-MR-01';
+    const containerRadar = document.getElementById('container-chart-radar');
+    const containerCom = document.getElementById('container-chart-communication');
+
     const filtered = getFilteredEvaluations();
     const fsItems = filtered.filter(x => x.formType === 'FM-MR12-MR-01');
     const comItems = filtered.filter(x => x.formType === 'FM-MR14-MR-04');
 
-    renderRadarChart(fsItems);
-    renderCommunicationBarChart(comItems);
+    if (isFS) {
+        if (containerRadar) containerRadar.classList.remove('hidden');
+        if (containerCom) containerCom.classList.add('hidden');
+        renderRadarChart(fsItems);
+    } else {
+        if (containerRadar) containerRadar.classList.add('hidden');
+        if (containerCom) containerCom.classList.remove('hidden');
+        renderCommunicationBarChart(comItems);
+    }
+
     renderDistributionChart(filtered);
     renderEmpCompareChart(filtered);
     if (AppState.isAdminUnlocked) {
@@ -2075,20 +2248,55 @@ function renderDistributionChart(filtered) {
         AppState.charts.distribution.destroy();
     }
 
-    let counts = {
-        'ยอดเยี่ยม / ดีมาก (≥80%)': 0,
-        'ดี / เข้าใจดี (65-79%)': 0,
-        'พอใช้ / กำลังพัฒนา (45-64%)': 0,
-        'ต้องปรับปรุง / เสี่ยง (<45%)': 0
-    };
+    const isFS = AppState.filter.formType === 'FM-MR12-MR-01';
+    const titleEl = document.getElementById('chart-dist-title');
+    const descEl = document.getElementById('chart-dist-desc');
+    if (titleEl) {
+        titleEl.innerHTML = isFS 
+            ? '<span>🍩</span> สัดส่วนระดับผลการประเมิน วัฒนธรรมความปลอดภัยอาหาร'
+            : '<span>🍩</span> สัดส่วนระดับผลการประเมิน การสื่อสารและประชาสัมพันธ์';
+    }
+    if (descEl) {
+        descEl.textContent = isFS
+            ? 'สัดส่วนระดับความตระหนักรู้ 5 ระดับ (ยอดเยี่ยม ถึง มีความเสี่ยง)'
+            : 'สัดส่วนระดับประสิทธิผล 4 ระดับ (ดีมาก ถึง ปรับปรุง)';
+    }
 
-    filtered.forEach(item => {
-        const pct = item.percentage;
-        if (pct >= 80) counts['ยอดเยี่ยม / ดีมาก (≥80%)']++;
-        else if (pct >= 65) counts['ดี / เข้าใจดี (65-79%)']++;
-        else if (pct >= 45) counts['พอใช้ / กำลังพัฒนา (45-64%)']++;
-        else counts['ต้องปรับปรุง / เสี่ยง (<45%)']++;
-    });
+    let counts = {};
+    let bgColors = [];
+    if (isFS) {
+        counts = {
+            'ยอดเยี่ยม (81-100)': 0,
+            'เข้าใจดี (61-80)': 0,
+            'กำลังพัฒนา (41-60)': 0,
+            'ต้องปรับปรุง (21-40)': 0,
+            'มีความเสี่ยง (0-20)': 0
+        };
+        bgColors = ['#059669', '#0284c7', '#d97706', '#ea580c', '#dc2626'];
+        filtered.forEach(item => {
+            const sc = item.totalScore || 0;
+            if (sc >= 81) counts['ยอดเยี่ยม (81-100)']++;
+            else if (sc >= 61) counts['เข้าใจดี (61-80)']++;
+            else if (sc >= 41) counts['กำลังพัฒนา (41-60)']++;
+            else if (sc >= 21) counts['ต้องปรับปรุง (21-40)']++;
+            else counts['มีความเสี่ยง (0-20)']++;
+        });
+    } else {
+        counts = {
+            'ดีมาก (≥80%)': 0,
+            'ดี (65-79%)': 0,
+            'พอใช้ (45-64%)': 0,
+            'ปรับปรุง (<45%)': 0
+        };
+        bgColors = ['#059669', '#0284c7', '#f59e0b', '#ef4444'];
+        filtered.forEach(item => {
+            const pct = item.percentage || 0;
+            if (pct >= 80) counts['ดีมาก (≥80%)']++;
+            else if (pct >= 65) counts['ดี (65-79%)']++;
+            else if (pct >= 45) counts['พอใช้ (45-64%)']++;
+            else counts['ปรับปรุง (<45%)']++;
+        });
+    }
 
     const ctx = canvas.getContext('2d');
     AppState.charts.distribution = new Chart(ctx, {
@@ -2098,7 +2306,7 @@ function renderDistributionChart(filtered) {
             datasets: [
                 {
                     data: Object.values(counts),
-                    backgroundColor: ['#059669', '#0284c7', '#f59e0b', '#ef4444'],
+                    backgroundColor: bgColors,
                     hoverOffset: 4
                 }
             ]
@@ -2131,46 +2339,101 @@ function renderEmpCompareChart(filtered) {
         AppState.charts.empCompare.destroy();
     }
 
-    const fsItems = filtered.filter(x => x.formType === 'FM-MR12-MR-01');
-    const comItems = filtered.filter(x => x.formType === 'FM-MR14-MR-04');
+    const isFS = AppState.filter.formType === 'FM-MR12-MR-01';
+    const titleEl = document.getElementById('chart-emp-title');
+    const descEl = document.getElementById('chart-emp-desc');
+    if (titleEl) {
+        titleEl.innerHTML = isFS
+            ? '<span>⚖️</span> เปรียบเทียบคะแนน 6 มิติ: พนักงาน WSB vs ผู้รับเหมา Sup'
+            : '<span>⚖️</span> เปรียบเทียบคะแนนการสื่อสารฯ: พนักงาน WSB vs ผู้รับเหมา Sup';
+    }
+    if (descEl) {
+        descEl.textContent = isFS
+            ? 'เปรียบเทียบคะแนนเฉลี่ย 6 มิติหลักของ Food Safety Culture (เต็ม 5.0)'
+            : 'เปรียบเทียบคะแนนเฉลี่ยรายกลุ่มหัวข้อการสื่อสารและประชาสัมพันธ์ (เต็ม 4.0)';
+    }
 
-    // Food safety averages (%)
-    const fsEmp = fsItems.filter(x => !isContractorEvaluation(x));
-    const fsSup = fsItems.filter(x => isContractorEvaluation(x));
-    const fsEmpScore = fsEmp.length ? (fsEmp.reduce((a, c) => a + c.percentage, 0) / fsEmp.length).toFixed(1) : 0;
-    const fsSupScore = fsSup.length ? (fsSup.reduce((a, c) => a + c.percentage, 0) / fsSup.length).toFixed(1) : 0;
+    const empItems = filtered.filter(x => !isContractorEvaluation(x));
+    const supItems = filtered.filter(x => isContractorEvaluation(x));
 
-    // Communication averages (%)
-    const comEmp = comItems.filter(x => !isContractorEvaluation(x));
-    const comSup = comItems.filter(x => isContractorEvaluation(x));
-    const comEmpScore = comEmp.length ? (comEmp.reduce((a, c) => a + c.percentage, 0) / comEmp.length).toFixed(1) : 0;
-    const comSupScore = comSup.length ? (comSup.reduce((a, c) => a + c.percentage, 0) / comSup.length).toFixed(1) : 0;
+    let labels = [];
+    let empData = [];
+    let supData = [];
+    let maxY = 5;
 
-    // Overall averages (%)
-    const allEmp = filtered.filter(x => !isContractorEvaluation(x));
-    const allSup = filtered.filter(x => isContractorEvaluation(x));
-    const allEmpScore = allEmp.length ? (allEmp.reduce((a, c) => a + c.percentage, 0) / allEmp.length).toFixed(1) : 0;
-    const allSupScore = allSup.length ? (allSup.reduce((a, c) => a + c.percentage, 0) / allSup.length).toFixed(1) : 0;
+    if (isFS) {
+        labels = [
+            '1. ความเป็นผู้นำ',
+            '2. การมีส่วนร่วม',
+            '3. การสื่อสาร',
+            '4. ผู้รับผิดชอบ',
+            '5. ความรู้ & อบรม',
+            '6. สภาพแวดล้อม',
+            'ภาพรวมเฉลี่ย'
+        ];
+        const empDims = calculateFSDimensions(empItems);
+        const supDims = calculateFSDimensions(supItems);
+        const empAvg = empItems.length ? (empItems.reduce((a, c) => a + c.totalScore, 0) / (empItems.length * 20)).toFixed(2) : 0;
+        const supAvg = supItems.length ? (supItems.reduce((a, c) => a + c.totalScore, 0) / (supItems.length * 20)).toFixed(2) : 0;
+
+        empData = [...empDims, parseFloat(empAvg)];
+        supData = [...supDims, parseFloat(supAvg)];
+        maxY = 5;
+    } else {
+        // Communication (4 main topic categories)
+        labels = [
+            'นโยบายคุณภาพ (ข้อ 1-3)',
+            'ความปลอดภัย/สิทธิ (ข้อ 4-6)',
+            'ช่องทางสื่อสาร (ข้อ 7-9)',
+            'ชุมชน & ร้องเรียน (ข้อ 10-12)',
+            'ภาพรวมเฉลี่ย'
+        ];
+        const calcGroupAvg = (items, startQ, endQ) => {
+            if (!items || items.length === 0) return 0;
+            let sum = 0;
+            let count = 0;
+            for (let q = startQ; q <= endQ; q++) {
+                sum += items.reduce((acc, c) => acc + ((c.answers && c.answers[q]) || 0), 0);
+                count += items.length;
+            }
+            return count ? parseFloat((sum / count).toFixed(2)) : 0;
+        };
+
+        const empOverall = empItems.length ? (empItems.reduce((a, c) => a + c.totalScore, 0) / (empItems.length * 12)).toFixed(2) : 0;
+        const supOverall = supItems.length ? (supItems.reduce((a, c) => a + c.totalScore, 0) / (supItems.length * 12)).toFixed(2) : 0;
+
+        empData = [
+            calcGroupAvg(empItems, 1, 3),
+            calcGroupAvg(empItems, 4, 6),
+            calcGroupAvg(empItems, 7, 9),
+            calcGroupAvg(empItems, 10, 12),
+            parseFloat(empOverall)
+        ];
+        supData = [
+            calcGroupAvg(supItems, 1, 3),
+            calcGroupAvg(supItems, 4, 6),
+            calcGroupAvg(supItems, 7, 9),
+            calcGroupAvg(supItems, 10, 12),
+            parseFloat(supOverall)
+        ];
+        maxY = 4;
+    }
 
     const ctx = canvas.getContext('2d');
     AppState.charts.empCompare = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: [
-                'ความปลอดภัยอาหาร (FSC)',
-                'การสื่อสาร & ประชาสัมพันธ์',
-                'ภาพรวมเฉลี่ยทุกแบบประเมิน'
-            ],
+            labels: labels,
             datasets: [
                 {
-                    label: `🏢 พนักงาน WSB (${allEmp.length} คน)`,
-                    data: [parseFloat(fsEmpScore), parseFloat(comEmpScore), parseFloat(allEmpScore)],
-                    backgroundColor: '#059669',
+                    label: `🏢 พนักงาน WSB (${empItems.length} คน)`,
+                    data: empData,
+                    backgroundColor: isFS ? '#059669' : '#0284c7',
                     borderRadius: 6
                 },
                 {
-                    label: `👷 ผู้รับเหมา Sup (${allSup.length} คน)`,
-                    data: [parseFloat(fsSupScore), parseFloat(comSupScore), parseFloat(allSupScore)],
+                    label: `👷 ผู้รับเหมา Sup (${supItems.length} คน)`,
+                    data: supData,
                     backgroundColor: '#d97706',
                     borderRadius: 6
                 }
@@ -2182,15 +2445,15 @@ function renderEmpCompareChart(filtered) {
             scales: {
                 y: {
                     min: 0,
-                    max: 100,
+                    max: maxY,
                     ticks: {
-                        callback: (v) => v + '%',
+                        stepSize: 1,
                         font: { family: 'Sarabun, sans-serif' }
                     },
                     grid: { color: '#f1f5f9' }
                 },
                 x: {
-                    ticks: { font: { family: 'Sarabun, sans-serif', weight: 'bold' } },
+                    ticks: { font: { family: 'Sarabun, sans-serif', size: 11 } },
                     grid: { display: false }
                 }
             },
@@ -2202,7 +2465,7 @@ function renderEmpCompareChart(filtered) {
                 },
                 tooltip: {
                     callbacks: {
-                        label: (ctx) => `${ctx.dataset.label.split('(')[0]}: ${ctx.raw}%`
+                        label: (ctx) => `${ctx.dataset.label.split('(')[0]}: ${ctx.raw} / ${maxY}`
                     }
                 }
             }
@@ -2448,6 +2711,20 @@ function renderDeptComparisonChart(filtered) {
 
     if (AppState.charts.deptCompare) {
         AppState.charts.deptCompare.destroy();
+    }
+
+    const isFS = AppState.filter.formType === 'FM-MR12-MR-01';
+    const titleEl = document.getElementById('chart-dept-title');
+    const descEl = document.getElementById('chart-dept-desc');
+    if (titleEl) {
+        titleEl.innerHTML = isFS
+            ? '<span>🏢</span> เปรียบเทียบคะแนนเฉลี่ย Food Safety Culture แยกตามฝ่าย / แผนก'
+            : '<span>🏢</span> เปรียบเทียบคะแนนเฉลี่ยการสื่อสารและประชาสัมพันธ์ แยกตามฝ่าย / แผนก';
+    }
+    if (descEl) {
+        descEl.textContent = isFS
+            ? 'คะแนนเฉลี่ยร้อยละ (%) ด้านวัฒนธรรมความปลอดภัยอาหารของแต่ละฝ่าย / แผนก'
+            : 'คะแนนเฉลี่ยร้อยละ (%) ด้านประสิทธิผลการสื่อสารและประชาสัมพันธ์ของแต่ละฝ่าย / แผนก';
     }
 
     // Group average % by department
@@ -3159,8 +3436,7 @@ function setupEventListeners() {
     const filterFormType = document.getElementById('filter-form-type');
     if (filterFormType) {
         filterFormType.addEventListener('change', (e) => {
-            AppState.filter.formType = e.target.value;
-            refreshDashboard();
+            selectDashboardEvaluation(e.target.value);
         });
     }
 
@@ -3273,6 +3549,7 @@ function setupEventListeners() {
 }
 
 function refreshDashboard() {
+    updateDashboardEvaluationButtons();
     updateDashboardMetrics();
     renderDashboardCharts();
     updateAdminInsightsVisibility();
