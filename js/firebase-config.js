@@ -52,6 +52,9 @@ function initFirebase() {
 
         isFirebaseReady = true;
         console.log("✅ Cloud Firestore initialized successfully for project:", FIREBASE_CONFIG.projectId);
+        if (typeof onFirebaseRealtimeUpdate === 'function') {
+            listenToEvaluationsRealtime(onFirebaseRealtimeUpdate);
+        }
         return true;
     } catch (err) {
         console.error("Failed to initialize Firebase:", err);
@@ -151,5 +154,47 @@ async function clearAllEvaluationsFromCloud() {
     } catch (err) {
         console.error("Firestore clear all error:", err);
         return false;
+    }
+}
+
+let firestoreRealtimeUnsubscribe = null;
+
+/**
+ * Listen to real-time evaluation updates from Cloud Firestore
+ * @param {Function} callback (results: Array) => void
+ * @returns {Function|null} unsubscribe function
+ */
+function listenToEvaluationsRealtime(callback) {
+    if (!isFirebaseReady || !firebaseDb) {
+        return null;
+    }
+
+    try {
+        if (typeof firestoreRealtimeUnsubscribe === 'function') {
+            firestoreRealtimeUnsubscribe();
+            firestoreRealtimeUnsubscribe = null;
+        }
+
+        firestoreRealtimeUnsubscribe = firebaseDb.collection('evaluations')
+            .orderBy('timestamp', 'desc')
+            .onSnapshot(snapshot => {
+                const results = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    data.id = data.id || doc.id;
+                    results.push(data);
+                });
+                console.log(`📡 Cloud Firestore Realtime Sync: ${results.length} evaluations loaded`);
+                if (typeof callback === 'function') {
+                    callback(results);
+                }
+            }, err => {
+                console.warn("Firestore realtime snapshot listener notice:", err);
+            });
+
+        return firestoreRealtimeUnsubscribe;
+    } catch (err) {
+        console.warn("Could not register Firestore realtime listener:", err);
+        return null;
     }
 }
