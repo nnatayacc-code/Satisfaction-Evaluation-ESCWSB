@@ -3147,13 +3147,12 @@ async function clearAllEvaluations() {
     alert("ล้างข้อมูลการประเมินทั้งหมดเรียบร้อยแล้ว");
 }
 
-// Update Header Counter Badges
+// Update Header Counter Badges (Hidden per user requirement)
 function updateCounterBadges() {
-    const totalCount = AppState.evaluations.length;
     const badge = document.getElementById('nav-total-count');
     if (badge) {
-        badge.textContent = totalCount;
-        badge.classList.toggle('hidden', totalCount === 0);
+        badge.classList.add('hidden');
+        badge.textContent = '';
     }
 }
 
