@@ -512,13 +512,19 @@
             <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
                 <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-b border-slate-100 pb-4 mb-4">
                     <div>
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-md">LIVE ANALYTICS</span>
+                        <div class="flex items-center gap-2.5 flex-wrap">
+                            <span id="realtime-live-badge" class="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full shadow-2xs border border-emerald-200">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span>LIVE ANALYTICS (REAL-TIME)</span>
+                            </span>
+                            <span id="realtime-sync-time" class="text-[11px] font-medium text-slate-500 hidden sm:inline">
+                                • อัปเดตสดล่าสุด: <span id="realtime-clock" class="font-mono text-emerald-700 font-bold">เชื่อมต่อแล้ว</span>
+                            </span>
                             <span id="admin-status-indicator"></span>
                             <h2 class="text-xl md:text-2xl font-extrabold text-slate-800">แดชบอร์ดสรุปรายงานผลการประเมิน</h2>
                         </div>
                         <p class="text-xs md:text-sm text-slate-500 mt-1">
-                            ภาพรวมผลคะแนนการประเมินตนเองวัฒนธรรมความปลอดภัยอาหาร และการสื่อสารประชาสัมพันธ์
+                            ภาพรวมผลคะแนนการประเมินตนเองวัฒนธรรมความปลอดภัยอาหาร และการสื่อสารประชาสัมพันธ์ (อัปเดตอัตโนมัติแบบเรียลไทม์)
                         </p>
                     </div>
 
@@ -1495,9 +1501,9 @@
     <!-- Firebase App & Firestore Compat SDKs (v10) -->
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-config.js?v=2.6"></script>
-    <script src="js/employees.js?v=2.6"></script>
-    <script src="js/data.js?v=2.6"></script>
-    <script src="js/app.js?v=2.6"></script>
+    <script src="js/firebase-config.js?v=2.7"></script>
+    <script src="js/employees.js?v=2.7"></script>
+    <script src="js/data.js?v=2.7"></script>
+    <script src="js/app.js?v=2.7"></script>
 </body>
 </html>
