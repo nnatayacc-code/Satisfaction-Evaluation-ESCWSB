@@ -55,6 +55,19 @@ function initApp() {
     updateAdminInsightsVisibility();
     updateCounterBadges();
 
+    // Start Cloud Firestore Realtime Sync listener
+    if (typeof listenToEvaluationsRealtime === 'function') {
+        listenToEvaluationsRealtime(onFirebaseRealtimeUpdate);
+    }
+
+    // Periodic Background Polling Fallback (every 20s)
+    setInterval(() => {
+        fetchServerEvaluations();
+    }, 20000);
+
+    // Initial update of live sync clock
+    updateLiveSyncStatus();
+
     // Check URL parameters for direct form / tab navigation from QR code
     handleUrlParams();
 
@@ -80,20 +93,40 @@ async function checkTunnelUrl() {
     } catch (e) {}
 }
 
-// Helper to merge evaluations into AppState and update charts
-function mergeEvaluationsList(serverList) {
+// Helper to merge evaluations into AppState and update charts & tables
+function mergeEvaluationsList(serverList, isAuthoritative = false) {
     if (!Array.isArray(serverList)) return;
     const cleaned = serverList.filter(x => !(x.id && x.id.toString().startsWith('DEMO-')));
-    const map = new Map();
-    cleaned.forEach(item => { if (item.id) map.set(item.id, item); });
-    AppState.evaluations.forEach(item => { if (item.id && !map.has(item.id)) map.set(item.id, item); });
-    AppState.evaluations = Array.from(map.values()).sort((a, b) => new Date(b.timestamp || b.date) - new Date(a.timestamp || a.date));
+    
+    if (isAuthoritative) {
+        AppState.evaluations = cleaned.sort((a, b) => new Date(b.timestamp || b.date) - new Date(a.timestamp || a.date));
+    } else {
+        const map = new Map();
+        cleaned.forEach(item => { if (item.id) map.set(item.id, item); });
+        AppState.evaluations.forEach(item => { if (item.id && !map.has(item.id)) map.set(item.id, item); });
+        AppState.evaluations = Array.from(map.values()).sort((a, b) => new Date(b.timestamp || b.date) - new Date(a.timestamp || a.date));
+    }
+    
     localStorage.setItem(APP_CONFIG.storageKey, JSON.stringify(AppState.evaluations));
-    updateDashboardEvaluationButtons();
-    updateDashboardMetrics();
-    renderDashboardCharts();
-    updateAdminInsightsVisibility();
-    updateCounterBadges();
+    refreshDashboard();
+    updateLiveSyncStatus();
+}
+
+// Global handler for Cloud Firestore Realtime Updates (24/7 Live Sync)
+function onFirebaseRealtimeUpdate(cloudList) {
+    if (!Array.isArray(cloudList)) return;
+    mergeEvaluationsList(cloudList, true);
+    refreshDashboard();
+    updateLiveSyncStatus();
+}
+
+// Update clock and live status text in header
+function updateLiveSyncStatus(time = new Date()) {
+    const clockEl = document.getElementById('realtime-clock');
+    if (clockEl) {
+        const timeStr = time.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        clockEl.textContent = `${timeStr} น.`;
+    }
 }
 
 // Load evaluations from LocalStorage and Cloud Firestore / Server
@@ -147,8 +180,9 @@ async function fetchServerEvaluations() {
 function saveEvaluations() {
     try {
         localStorage.setItem(APP_CONFIG.storageKey, JSON.stringify(AppState.evaluations));
-        updateDashboardEvaluationButtons();
+        refreshDashboard();
         updateCounterBadges();
+        updateLiveSyncStatus();
     } catch (e) {
         console.error("Error saving to localStorage:", e);
         alert("ไม่สามารถบันทึกข้อมูลได้ เนื่องจากพื้นที่จัดเก็บไม่เพียงพอ");
@@ -290,11 +324,10 @@ function switchTab(tabId, bypassEmpModal = false) {
         }
     });
 
-    // If switched to dashboard, refresh charts
+    // If switched to dashboard, refresh all metrics & charts
     if (tabId === 'dashboard') {
         setTimeout(() => {
-            renderDashboardCharts();
-            updateAdminInsightsVisibility();
+            refreshDashboard();
         }, 50);
     }
 
@@ -1362,6 +1395,13 @@ function handleForm1Submit(e) {
 
     AppState.evaluations.unshift(newEvaluation);
     saveEvaluations();
+
+    // Automatically update dashboard to show Form 1 data in real-time
+    AppState.filter.formType = 'FM-MR12-MR-01';
+    const selForm1 = document.getElementById('filter-form-type');
+    if (selForm1) selForm1.value = 'FM-MR12-MR-01';
+    refreshDashboard();
+
     syncEvaluationToServer(newEvaluation);
 
     // Show success modal
@@ -1625,6 +1665,13 @@ function handleForm2Submit(e) {
 
     AppState.evaluations.unshift(newEvaluation);
     saveEvaluations();
+
+    // Automatically update dashboard to show Form 2 data in real-time
+    AppState.filter.formType = 'FM-MR14-MR-04';
+    const selForm2 = document.getElementById('filter-form-type');
+    if (selForm2) selForm2.value = 'FM-MR14-MR-04';
+    refreshDashboard();
+
     syncEvaluationToServer(newEvaluation);
 
     // Show success modal
@@ -3553,6 +3600,7 @@ function refreshDashboard() {
     updateDashboardMetrics();
     renderDashboardCharts();
     updateAdminInsightsVisibility();
+    updateCounterBadges();
 }
 
 // -------------------------------------------------------------------------
